@@ -238,26 +238,69 @@ Class OC_Projects_App {
 	}
 
 	public static function trashNote($trash_note_id) {
-		$updateNote = OCP\DB::prepare("UPDATE *PREFIX*projects_notes SET status = ? WHERE note_id = ?");
-		$updateNote->execute ( array ( 'old', $trash_note_id ) );
+		$updateNote = OCP\DB::prepare("UPDATE *PREFIX*projects_notes SET status = 'old' WHERE note_id = ?");
+		$updateNote->execute ( array ( $trash_note_id ) );
 		
 		$query = OCP\DB::prepare( 'SELECT project_id, note FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
 		$result = $query->execute(array($trash_note_id));
-		$note = $result->fetchRow();
-		
+		$notedata = $result->fetchRow();
+		$project_id = $notedata['project_id'];
+		$note = $notedata['note'];
 		$creator = OC_User::getUser();
 		$atime = date("Y-m-d H:i:s");
 		
-		$query = OCP\DB::prepare('INSERT INTO *PREFIX*projects_notes (project_id, parent_id, creator, status, atime, note) VALUES (?, ?, ?, ?, ?, ?)');
-		$query->execute( array ( $note['project_id'], NULL, $creator, 'trash', $atime, $note['note'] ) );
+		$query = OCP\DB::prepare('INSERT INTO *PREFIX*projects_notes (project_id, parent_id, creator, status, atime, note) VALUES (?, ?, ?, "trash", ?, ?)');
+		$query->execute( array ( $project_id, $trash_note_id, $creator, $atime, $note ) );
 		$note_id = OC_DB::insertid();
-		return(array("note_id" => $note_id, "project_id" => $note['project_id'], "creator" => $creator, "status" => "trash", "atime" => $atime, "note" => $note['note']));
-		
+		return(array("note_id" => $note_id, "project_id" => $project_id, "creator" => $creator, "status" => "trash", "atime" => $atime, "note" => $note));
 	}
 
-	public static function editNote($project_id, $note) {
+	public static function editNote($edit_note_id, $note) {
+		$updateNote = OCP\DB::prepare("UPDATE *PREFIX*projects_notes SET status = 'old' WHERE note_id = ?");
+		$updateNote->execute( array ( $edit_note_id ) );
 		
+		$query = OCP\DB::prepare( 'SELECT project_id FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
+		$result = $query->execute(array($edit_note_id));
+		$notedata = $result->fetchRow();
+		$project_id = $notedata['project_id'];
+		$creator = OC_User::getUser();
+		$atime = date("Y-m-d H:i:s");
+		
+		$query = OCP\DB::prepare('INSERT INTO *PREFIX*projects_notes (project_id, parent_id, creator, status, atime, note) VALUES (?, ?, ?, "current", ?, ?)');
+		$query->execute( array ( $project_id, $edit_note_id, $creator, $atime, $note ) );
+		$note_id = OC_DB::insertid();
+		return(array("note_id" => $note_id, "project_id" => $project_id, "creator" => $creator, "status" => "current", "atime" => $atime, "note" => $note ));
 	}
 
+	public static function restoreNote($restore_note_id) {
+		$updateNote = OCP\DB::prepare("UPDATE *PREFIX*projects_notes SET status = 'current' WHERE note_id = ?");
+		$updateNote->execute( array ( $restore_note_id ) );
+		
+		$query = OCP\DB::prepare( 'SELECT project_id, creator, atime, note FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
+		$result = $query->execute(array($restore_note_id));
+		$notedata = $result->fetchRow();
+		$project_id = $notedata['project_id'];
+		$creator = $notedata['creator'];
+		$atime = $notedata['atime'];
+		$note = $notedata['note'];
+		
+		return(array("note_id" => $restore_note_id, "project_id" => $project_id, "creator" => $creator, "status" => "current", "atime" => $atime, "note" => $note ));
+	}
+
+	public static function deleteNotePermenantly($delete_note_permenantly) {
+		// get parent notes
+		$query = OCP\DB::prepare( 'SELECT parent_id FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
+		$result = $query->execute(array($delete_note_permenantly));
+		$notedata = $result->fetchRow();
+		if ($notedata['parent_id']) {
+			$query = OCP\DB::prepare( 'SELECT parent_id FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
+			$result = $query->execute(array($delete_note_permenantly));
+			$notedata = $result->fetchRow();
+		}
+
+
+		$deleteNote = OCP\DB::prepare('DELETE from *PREFIX*projects_notes WHERE note_id= ?');
+		return (array ('note_id' => $delete_note_permenantly ));
+	}
 }
 ?>

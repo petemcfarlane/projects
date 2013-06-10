@@ -45,7 +45,8 @@ input[type="checkbox"].complete_checkbox {margin-top: 3px;}
  * Notes
  */
 
-.note {border: 1px solid #EEE;padding: 1em;border-radius: 1em;margin: 1em;box-shadow: 0 5px 5px -5px #CCC;}
+#new_note_button {margin: 1.5em auto;display: block;}
+.note {border: 1px solid #EEE;padding: 1em;margin: 1em;box-shadow: 0 5px 5px -5px #CCC;}
 .note footer {color: #888;}
 .note button {opacity:0;transition: opacity .2s;-moz-transition: opacity .2s;-webkit-transition: opacity .2s;}
 .note:hover button {opacity:1;}
@@ -53,6 +54,8 @@ input[type="checkbox"].complete_checkbox {margin-top: 3px;}
 #note {width: 96%;margin: 0;padding: 2%;min-height: 70px;}
 #note_template, #trash_template {display:none;}
 .trash {display: none;}
+.note textarea {background: #FFF;border: none;margin: 0;padding: 0;box-shadow: none;width: 100%;resize:none;border-radius:0;}
+
 /*
  * Sidebar
  *

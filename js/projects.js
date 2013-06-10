@@ -88,6 +88,7 @@ $(document).ready(function(){
 		event.preventDefault();
 		var post = $(this).serialize();
 		$.post( OC.filePath('projects', 'ajax', 'edit_task.php'), post, function(data) {
+			console.log(data);
 			if (data.hasOwnProperty('calendar_id')) {
 				$('#calendar_id').val(data['calendar_id']);
 			}
@@ -212,7 +213,6 @@ $(document).ready(function(){
 	
 	// on add new note
 	$('#content').on('click', '#new_note_button', function() {
-		$(this).fadeOut("fast");
 		$('#new_note').fadeIn("fast").draggable();
 		$('#note').focus();
 	});
@@ -224,9 +224,9 @@ $(document).ready(function(){
 				article.attr('id', 'note_id_'+data.note.note_id );
 				article.find('.content').html(data.note.note);
 				article.find('footer span').html('Created by ' + data.note.creator + ' on ' + formatDate(data.note.atime) )
+				article.find('.edit_button, .trash_button').attr('data-note_id', data.note.note_id );
 				article.insertAfter('#note_template');
 				$('#new_note').fadeOut("fast");
-				$('#new_note_button').fadeIn("fast");		
 			} else {
 				console.log(data);
 			}
@@ -234,40 +234,71 @@ $(document).ready(function(){
 	});
 	$('#content').on('click', '#cancel_new_note', function() {
 		$('#new_note').fadeOut("fast");
-		$('#new_note_button').fadeIn("fast");		
 	});
 	
 	// edit note
 	$('#content').on('click', '.note .edit_button', function() {
-		var id = $(this).parent().parent().attr('id').substring(8), note = $(this).parent().parent().find('.content').html();
-		$(this).parent().parent().find('.content').hide().after('<textarea class="note_'+id+'">'+note+'</textarea>');
-		$(this).hide().next().hide().after('<button>Submit Changes</button><button>Cancel Changes</button>');
-		
-		$.post( OC.filePath('projects', 'ajax', 'edit_note.php'), "edit_note_id="+id+"&note=", function(data) {
-			console.log(data);
-		}, 'json');
+		var id = $(this).attr('data-note_id'), content = $('#note_id_'+id).find('.content');
+		content.hide().after('<textarea class="note_'+id+'">'+content.html()+'</textarea>');
+		$('.note_'+id).select();
+		$('#note_id_'+id).find('.meta, .edit_button, .trash_button').hide()
+		$('#note_id_'+id).find('footer').append('<button class="submit_changes">Submit Changes</button><button class="cancel_changes">Cancel Changes</button>');
+		$('.submit_changes').on('click', function() {
+			$.post( OC.filePath('projects', 'ajax', 'edit_note.php'), "edit_note_id="+id+"&note="+$('.note_'+id).val(), function(data) {
+				var article = $('#note_id_'+id);
+				article.attr('id', 'note_id_'+data.note.note_id );
+				article.find('.content').html(data.note.note);
+				article.find('footer span').html('Updated by ' + data.note.creator + ' on ' + formatDate(data.note.atime) )
+				article.find('.edit_button, .trash_button').attr('data-note_id', data.note.note_id );
+				article.find('.content, .meta, .edit_button, .trash_button').show()
+				article.find('textarea, .submit_changes, .cancel_changes').remove()
+			}, 'json');
+		});
+		$('.cancel_changes').on('click', function() {
+			$('#note_id_'+id).find('.content, .meta, .edit_button, .trash_button').show()
+			$('#note_id_'+id).find('.submit_changes, .cancel_changes, .note_'+id).remove()
+		});
 	});
 	
 	// delete note 
 	$('#content').on('click', '.note .trash_button', function() {
-		var id = $(this).parent().parent().attr('id').substring(8);
+		var id = $(this).attr('data-note_id');
 		$.post( OC.filePath('projects', 'ajax', 'edit_note.php'), "trash_note_id="+id, function(data) {
-			if (data.status == "success") {
-				var article = $('#trash_template').clone();
-				article.attr('id', 'note_id_'+data.note.note_id );
-				article.find('.content').html(data.note.note);
-				article.find('footer span').html('Trashed by ' + data.note.creator + ' on ' + formatDate(data.note.atime) )
-				article.insertAfter('#trash_template');
-				$('#note_id_'+id).fadeOut("fast").remove();
-			} else {
-				console.log(data);
-			}
+			var article = $('#trash_template').clone();
+			article.attr('id', 'note_id_'+data.note.note_id );
+			article.find('.content').html(data.note.note);
+			article.find('footer span').html('Trashed by ' + data.note.creator + ' on ' + formatDate(data.note.atime) )
+			article.find('.restore, .delete_permenantly').attr('data-note_id', data.note.note_id );
+			article.insertAfter('#trash_template');
+			$('#note_id_'+id).fadeOut("fast").remove();
 		}, 'json');
 	});
 	
 	// show trashed notes
 	$('#content').on('click', '#show_trash', function() {
 		$('.trash').not('#trash_template').fadeToggle('fast');		
+	});
+	
+	// restore note
+	$('#content').on('click', '.note .restore', function() {
+		var id = $(this).attr('data-note_id');
+		$.post( OC.filePath('projects', 'ajax', 'edit_note.php'), "restore_note_id="+id, function(data) {
+			$('#note_id_'+data.note.note_id).remove();
+			var article = $('#note_template').clone();
+			article.attr('id', 'note_id_'+data.note.note_id );
+			article.find('.content').html(data.note.note);
+			article.find('footer span').html('Created by ' + data.note.creator + ' on ' + formatDate(data.note.atime) )
+			article.find('.edit_button, .trash_button').attr('data-note_id', data.note.note_id );
+			article.insertAfter('#note_template');
+		}, 'json');
+	});
+	
+	// delete note permenantly
+	$('#content').on('click', '.note .delete_permenantly', function() {
+		var id = $(this).attr('data-note_id');
+		$.post( OC.filePath('projects', 'ajax', 'edit_note.php'), "delete_note_permenantly="+id, function(data) {
+			console.log(data)
+		}, 'json');			
 	});
 	
 	/*

@@ -59,7 +59,14 @@ if ( isset($_POST['type']) && $_POST['type'] == 'update') {
 if ( $_POST['calendar_id'] === '0' ){
 	// Make the calendar, owned by project creator
 	try {
-		$new_calendar_id = OC_Calendar_Calendar::addCalendar(OC_Projects_App::getProjectCreator($_POST['project_id']), OC_Projects_App::getProjectName($_POST['project_id']));
+		$project_id = $_POST['project_id'];
+		$uid = OC_Projects_App::getProjectCreator($project_id);
+		$name = OC_Projects_App::getProjectName($project_id);
+		$components = 'VEVENT,VTODO,VJOURNAL';
+		$timezone = NULL;
+		$order = 0;
+		$rand_color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+		$new_calendar_id = OC_Calendar_Calendar::addCalendar($uid,$name,$components,$timezone,$order,$rand_color);
 	} catch (Exception $e) {
 		throw new Exception( 'Failed to create calendar ['. OC_Projects_App::getProjectName($_POST['project)id']).'] ' . $e);
 		print json_encode($e->getMessage());
@@ -67,7 +74,7 @@ if ( $_POST['calendar_id'] === '0' ){
 	
 	// Share the calendar, full privs, with all users.
 	try {
-		$token = OCP\Share::shareItem("calendar", $new_calendar_id, 0, "Chris", 15);
+		$token = OCP\Share::shareItem("calendar", $new_calendar_id, 0, "Chris", 31);
 	} catch (Exception $e) {
 		throw new Exception( 'Failed to share calendar ['. OC_Projects_App::getProjectName($_POST['project_id']).'] ' . $e);
 		print json_encode($e->getMessage());
