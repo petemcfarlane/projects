@@ -2,9 +2,10 @@
 	<h1>Start a project</h1>
 	<p>The admin group is automatically invited to all projects.</p>
 	<form id="new_project_form" method="post">
+		<input type="hidden" name="new_project" value="new" />
 		<p>
 			<label for="name" class="hidden">Name the project</label>
-			<input id="name" name="name" type="text" placeholder="Name the project" value="Name the project" autocomplete="off" />
+			<input id="name" name="name" type="text" placeholder="Name the project" autocomplete="off" />
 		</p>
 		<p>
 			<label for="description" class="hidden">Add a description or extra details (optional)</label>

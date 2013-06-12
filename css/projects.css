@@ -25,8 +25,8 @@ h1#title {background: #f8f8f8;}
  * Tasks
  */
 
-#tasks {white-space:normal;width:100%;}
-#tasks td {vertical-align: top; padding: 1em 0;}
+#tasks {white-space:normal;}
+#tasks td {vertical-align: top; padding: 1em;}
 .priority {color: #CE0101; font-weight: bold; margin:0.5em;}
 input[type="checkbox"].complete_checkbox {margin-top: 3px;}
 .task_summary {font-weight: bold;}

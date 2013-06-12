@@ -8,29 +8,13 @@ OCP\Util::addStyle('projects', 'projects');
 
 OCP\App::setActiveNavigationEntry( 'projects' );
 
-if ( isset ($_POST['add_project']) ) {
-	$request = array();
-	$request['name'] = $_POST['name'];
-	$request['description'] = $_POST['description'];
-	$users = array();
-	$request['users'] = "";
-	foreach ($_POST['users'] as $user ) {
-		if ($user != '') {
-			$request['users'] .= $user.',';
-		}
-	}
-	$projectID = OC_Projects_App::newProject($request);
-}
-
-if ( isset ( $params['projectID']) ) $projectID = $params['projectID']; 
-if ( isset ($_GET['id'])) $projectID = $_GET['id'];
-
-if ( isset($_SERVER['HTTP_X_PJAX']) && $_SERVER['HTTP_X_PJAX'] == true ) {
-	// JUST load the content
-	$renderas = '';
-} else $renderas = 'user';
+$project_id = ( isset($params['project_id']) && is_numeric($params['project_id']) ) ? $params['project_id'] : NULL; 
+$view 		= isset($params['view']) ? $params['view'] : ( isset($project_id) ? 'project' : NULL );
+$uid		= OC_User::getUser();
+$renderas 	= ( isset($_SERVER['HTTP_X_PJAX']) ) ? '' : 'user';
 
 $tmpl = new OCP\Template( 'projects', 'projects', $renderas );
-if ( isset($projectID) ) $tmpl->assign( 'id', $projectID );
-if ( isset($params['view'])) $tmpl->assign( 'view', $params['view'] );
+$tmpl->assign( 'project_id', $project_id );
+$tmpl->assign( 'view', $view );
+$tmpl->assign('uid', $uid );
 $tmpl->printPage();

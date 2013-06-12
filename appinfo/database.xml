@@ -293,6 +293,11 @@
 				<length>64</length>
 			</field>
 
+			<field>
+				<name>excerpt</name>
+				<type>clob</type>
+				<notnull>false</notnull>
+			</field>
 
 			<field>
 				<name>atime</name>

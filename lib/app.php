@@ -1,15 +1,21 @@
 <?php
 Class OC_Projects_App {
 	
-	public static function getProjects() {
-		$query 	  = OC_DB::prepare('SELECT id, name, description FROM *PREFIX*projects WHERE users LIKE ?');
-		$result	  = $query->execute( array( "%" . OC_User::getUser() . "%" ) );
+	public static function getProjects($uid) {
+		$query 	  = OC_DB::prepare('SELECT id, name, description FROM *PREFIX*projects WHERE users LIKE ? AND archive = 0');
+		$result	  = $query->execute( array( "%$uid%" ) );
 		return $result->fetchAll();
 	}
 	
-	public static function getProject($id) {
-		$query   = OC_DB::prepare('SELECT * FROM *PREFIX*projects WHERE id = ?');
-		$result = $query->execute( array ( $id ) );
+	public static function getArchivedProjects($uid) {
+		$query 	  = OC_DB::prepare('SELECT id, name, description FROM *PREFIX*projects WHERE users LIKE ? AND archive = 1');
+		$result	  = $query->execute( array( "%$uid%" ) );
+		return $result->fetchAll();
+	}
+	
+	public static function getProject($id, $uid) {
+		$query   = OC_DB::prepare('SELECT * FROM *PREFIX*projects WHERE id = ? AND users LIKE ? AND archive = 0');
+		$result = $query->execute( array ( $id, "%$uid%" ) );
 		return $result->fetchRow();
 	}
 	
@@ -31,64 +37,80 @@ Class OC_Projects_App {
 		$query = OCP\DB::prepare('INSERT INTO *PREFIX*projects (name, description, users, creator) VALUES (?, ?, ?, ?)');
 		$query->execute( array ( $request['name'], $request['description'], $request['users'], OC_User::getUser() ) );
 		$id = OC_DB::insertid();
+		self::addAction( $id, "created", "project", $id );
 		
-		$query = OCP\DB::prepare('INSERT INTO *PREFIX*projects_actions (project_id, uid, uaction, target_type, target_id, atime) VALUES (?, ?, ?, ?, ?, ?)');
-		$query->execute( array ( $id, OC_User::getUser(), "new_project", "project", $id, date("Y-m-d H:i:s") ) );
 		return $id;
 	}
 	
-	public static function actionDetail ($uid, $uaction, $target_type, $target_id, $atime) {
+	public static function updateProject($data) {
+		$project_id = $data['project_id'];
+		$update_key = mysql_real_escape_string($data['update_key']);
+		$update_value = $data['update_value'];
+		
+		//if ( !self::userInProject($data['id']) ) {
+		//	return array("Error" => OC_User::getUser() . " not in project " . $data['id']);
+		//	exit;
+		//}
+		
+		$updateQuery = OCP\DB::prepare("UPDATE *PREFIX*projects SET $update_key = ? WHERE id = ?");
+		$updateQuery->execute ( array ( $update_value, $project_id ) );
+		self::addAction( $project_id, 'edited', 'project', $project_id );
+		
+		return array("project_id"=>$project_id, "update"=>$update_key, "value"=>$update_value);
+		//return array( "id" => $project_id, "data" => array($data['key'] => $data['value']), "modified" => date("Y-m-d H:i:s"), "modifier" => OC_User::getUser() );
+	}
+		
+	
+	public static function actionDetail ($uid, $project_id, $uaction, $target_type, $target_id, $atime) {
 		$return = $uid." ";
 		switch($uaction) {
-			case "new_project":
-				$return .= "created the project ";
-				break;
-			case "edit_project";
-				$return .= "edited the project ";
-				break;
+			case "new_project": $return .= "created the project "; break;
+			case "edit_project"; $return .= "edited the project "; break;
+			case "new_note": $return .= "created the note "; break;
+			case "edit_note": $return .= "edited a note "; break;
+			case "trash_note": $return .= "trashed a note "; break;
+			case "restore_note": $return .= "restored a note "; break;
+			case "delete_note": $return .= "deleted a note "; break;
+				
 		}
 		switch ($target_type) {
-			case "project":
-				$return .= "<a href=" . OCP\Util::linkTo( 'projects', 'index.php' ) . "/" . $target_id .">" . self::getProjectName($target_id) . "</a>";
-				break;
-			case "platform":
-				$return .= "platform <a href=" . OCP\Util::linkTo( 'projects', 'index.php' ) . "/" . $target_id .">" . self::getProjectName($target_id) . "</a>";
-				break;
-			case "project_type":
-				$return .= "type <a href=" . OCP\Util::linkTo( 'projects', 'index.php' ) . "/" . $target_id .">" . self::getProjectName($target_id) . "</a>";
-				break;
+			case "project" : $return .= "<a href='" . OCP\Util::linkTo( 'projects', 'index.php' ) . "/" . $project_id ."'>" . self::getProjectName($project_id) . "</a>"; break;
+			case "platform" : $return .= "platform <a href='" . OCP\Util::linkTo( 'projects', 'index.php' ) . "/" . $project_id ."'>" . self::getProjectName($project_id) . "</a>"; break;
+			case "project_type" : $return .= "type <a href='" . OCP\Util::linkTo( 'projects', 'index.php' ) . "/" . $project_id ."'>" . self::getProjectName($project_id) . "</a>"; break;
+			case "note" : $return .= "type <a href='" . OCP\Util::linkTo( 'projects', 'index.php' ) . "/" . $project_id . "'>" . self::getProjectName($target_id) . "</a>"; break;
 		}
 		$return .= ", " . date( "h:ia", strtotime($atime) ) . " " . date( "jS M Y", strtotime($atime) );
 		return $return;
 	}
 
-	public static function userInProject($project_id) {
+	public static function userInProject($project_id, $uid=NULL) {
+		if (!$uid) $uid=OC_User::getUser();
 		$query = OCP\DB::prepare("SELECT users FROM *PREFIX*projects WHERE id = ?");
 		$result = $query->execute( array($project_id) );
 		$result = $result->fetchRow();
-		if ( strpos( $result['users'], OC_User::getUser() ."," ) !== false ) {
+		if ( strpos( $result['users'], $uid ."," ) !== false ) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public static function updateProject($data) {
-		
-		if ( !self::userInProject($data['id']) ) {
-			return array("Error" => OC_User::getUser() . " not in project " . $data['id']);
-			exit;
-		}
-		
-		$updateQuery = OCP\DB::prepare("UPDATE *PREFIX*projects SET $data[key] = ? WHERE id = ?");
-		$updateQuery->execute ( array ( $data['value'], $data['id'] ) );
-		self::updateAction($data['id'], "edit_project", $data['key'], $data['id']);
-		return array( "id" => $data['id'], "data" => array($data['key'] => $data['value']), "modified" => date("Y-m-d H:i:s"), "modifier" => OC_User::getUser() );
-	}
-		
+	// TO BE REPLACED WITH addAction
 	public static function updateAction( $project_id=NULL, $action="edit_project", $target_type, $target_id ) {
 		$query = OCP\DB::prepare('INSERT INTO *PREFIX*projects_actions (project_id, uid, uaction, target_type, target_id, atime) VALUES (?, ?, ?, ?, ?, ?)');
 		$query->execute( array ( $project_id, OC_User::getUser(), $action, $target_type, $target_id, date("Y-m-d H:i:s") ) );
+		return OC_DB::insertid();
+	}
+	
+	public static function addAction( $project_id, $action, $target_type, $target_id, $excerpt=NULL, $uid=NULL, $atime=NULL ){
+		if (!$project_id || !is_numeric($project_id) ) throw new Exception("Error \$project_id required and must be numeric", 1);
+		if (!$action) throw new Exception("Error \$action is required");
+		if (!$target_type) throw new Exception("Error \$target_type is required");
+		if (!$target_id) throw new Exception("Error \$target_id is required");
+		if (!isset ($uid)) $uid = OC_User::getUser();
+		if (!isset ($atime)) $atime = date("Y-m-d H:i:s");
+		$query = OCP\DB::prepare('INSERT INTO *PREFIX*projects_actions (project_id, uid, uaction, target_type, target_id, atime, excerpt) VALUES (?, ?, ?, ?, ?, ?, ?)');
+		$query->execute( array ( $project_id, $uid, $action, $target_type, $target_id, $atime, $excerpt ) );
 		return OC_DB::insertid();
 	}
 
@@ -234,6 +256,7 @@ Class OC_Projects_App {
 		$query = OCP\DB::prepare('INSERT INTO *PREFIX*projects_notes (project_id, parent_id, creator, status, atime, note) VALUES (?, ?, ?, ?, ?, ?)');
 		$query->execute( array ( $project_id, NULL, $creator, 'current', $atime, $note ) );
 		$note_id = OC_DB::insertid();
+		self::updateAction($project_id, "new_note", "note", $note_id);
 		return(array("note_id" => $note_id, "project_id" => $project_id, "creator" => $creator, "status" => "current", "atime" => $atime, "note" => $note));
 	}
 
@@ -252,6 +275,7 @@ Class OC_Projects_App {
 		$query = OCP\DB::prepare('INSERT INTO *PREFIX*projects_notes (project_id, parent_id, creator, status, atime, note) VALUES (?, ?, ?, "trash", ?, ?)');
 		$query->execute( array ( $project_id, $trash_note_id, $creator, $atime, $note ) );
 		$note_id = OC_DB::insertid();
+		self::updateAction($project_id, "trash_note", "note", $note_id);
 		return(array("note_id" => $note_id, "project_id" => $project_id, "creator" => $creator, "status" => "trash", "atime" => $atime, "note" => $note));
 	}
 
@@ -269,6 +293,7 @@ Class OC_Projects_App {
 		$query = OCP\DB::prepare('INSERT INTO *PREFIX*projects_notes (project_id, parent_id, creator, status, atime, note) VALUES (?, ?, ?, "current", ?, ?)');
 		$query->execute( array ( $project_id, $edit_note_id, $creator, $atime, $note ) );
 		$note_id = OC_DB::insertid();
+		self::updateAction($project_id, "edit_note", "note", $note_id);
 		return(array("note_id" => $note_id, "project_id" => $project_id, "creator" => $creator, "status" => "current", "atime" => $atime, "note" => $note ));
 	}
 
@@ -284,23 +309,33 @@ Class OC_Projects_App {
 		$atime = $notedata['atime'];
 		$note = $notedata['note'];
 		
+		self::updateAction($project_id, "restore_note", "note", $restore_note_id);
 		return(array("note_id" => $restore_note_id, "project_id" => $project_id, "creator" => $creator, "status" => "current", "atime" => $atime, "note" => $note ));
 	}
 
 	public static function deleteNotePermenantly($delete_note_permenantly) {
-		// get parent notes
-		$query = OCP\DB::prepare( 'SELECT parent_id FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
+		$query = OCP\DB::prepare( 'SELECT project_id FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
 		$result = $query->execute(array($delete_note_permenantly));
 		$notedata = $result->fetchRow();
-		if ($notedata['parent_id']) {
-			$query = OCP\DB::prepare( 'SELECT parent_id FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
-			$result = $query->execute(array($delete_note_permenantly));
+		$project_id = $notedata['project_id'];
+		self::updateAction($project_id, "delete_note", "note", $delete_note_permenantly);
+		$to_delete = array($delete_note_permenantly);
+
+		// get parent notes
+		while ( $delete_note_permenantly ) {
+			$query = OCP\DB::prepare( 'SELECT parent_id FROM *PREFIX*projects_notes WHERE note_id = ?' );
+			$result = $query->execute( array ( $delete_note_permenantly ) );
 			$notedata = $result->fetchRow();
+			$delete_notes = OCP\DB::prepare("DELETE FROM *PREFIX*projects_notes WHERE note_id = ?");
+			$delete_notes->execute( array ( $delete_note_permenantly ) );
+			if ($notedata['parent_id']) {
+				$delete_note_permenantly = $notedata['parent_id'];
+				array_push( $to_delete, $delete_note_permenantly );
+			} else {
+				$delete_note_permenantly = false;
+			}
 		}
-
-
-		$deleteNote = OCP\DB::prepare('DELETE from *PREFIX*projects_notes WHERE note_id= ?');
-		return (array ('note_id' => $delete_note_permenantly ));
+		return (array ('note_id' => $to_delete ));
 	}
 }
 ?>

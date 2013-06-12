@@ -56,10 +56,42 @@ $(document).ready(function(){
 	// New project button clicked
 	$('#content').on('click', '#new_project_button', function() {
 		$.post(OC.filePath('projects', 'templates', 'part.new.php'), function(data) {
-			console.log(OC.filePath('projects','templates','part/part.new.php'));
 			$('#main').html(data);
 			$('#new_project_form #name').focus();
 		});
+	});
+	// Submit new project
+	$('#content').on('submit', '#new_project_form', function(e) {
+		e.preventDefault();
+		$.post( OC.filePath('projects', 'ajax', 'edit_project.php'), $(this).serialize(), function(data) {
+			var url = OC.filePath('projects', null, 'index.php')+'/id/'+data.project_id;
+			$.pjax({url: url, container: '#content'});
+		}, "json");
+	});
+	// Archive project
+	$('#content').on('click', '#archive_project', function(e) {
+		e.preventDefault();
+		if (confirm('Do you really want to archive this project?')) {
+			$.post( OC.filePath('projects', 'ajax', 'edit_project.php'), 'archive_project='+$(this).attr('data-project_id'), function(data) {
+				console.log(data);
+				var url = OC.filePath('projects', null, 'index.php');
+				$.pjax({url: url, container: '#content'});
+			}, "json");
+		}
+	});
+	
+	// Show archived projects 
+	$('#content').on('click', '#show_archived_projects', function() {
+		$('#archived_project_list').toggle();
+	});
+	
+	// Restore project
+	$('#content').on('click', '.restore_archived_project', function() {
+		$.post( OC.filePath('projects', 'ajax', 'edit_project.php'), 'restore_archived_project='+$(this).attr('data-project_id'), function(data) {
+			console.log(data);
+			var url = OC.filePath('projects', null, 'index.php');
+			$.pjax({url: url, container: '#content'});
+		}, "json");
 	});
 	
 	/*
@@ -88,11 +120,7 @@ $(document).ready(function(){
 		event.preventDefault();
 		var post = $(this).serialize();
 		$.post( OC.filePath('projects', 'ajax', 'edit_task.php'), post, function(data) {
-			console.log(data);
-			if (data.hasOwnProperty('calendar_id')) {
-				$('#calendar_id').val(data['calendar_id']);
-			}
-			//console.log(data.task);
+			$('#calendar_id').val(data['calendar_id']);
 			$('#tasks').append('<tr class="task" data-task_id="' + data.task['id'] + '">' 
 				+ '<td><input data-task_id="' + data.task['id'] + '" class="complete_checkbox" type="checkbox" name="complete" /></td>'
 				+ '<td class="priority"></td>'
@@ -117,7 +145,6 @@ $(document).ready(function(){
 		if ( $(this).is(':checked') ) checked = 100;
 		var post = "id="+$(this).attr("data-task_id")+"&type=complete&checked="+checked+"&project_id="+$('#project_id').val();
 		$.post( OC.filePath('projects', 'ajax', 'edit_task.php'), post, function(data) {
-			console.log(data);
 			var task = $("#tasks").find("[data-task_id='" + data.data['id'] + "']");
 			if (data.data.complete == "100") {
 				completed = new Date(data.data.completed);
@@ -297,10 +324,12 @@ $(document).ready(function(){
 	$('#content').on('click', '.note .delete_permenantly', function() {
 		var id = $(this).attr('data-note_id');
 		$.post( OC.filePath('projects', 'ajax', 'edit_note.php'), "delete_note_permenantly="+id, function(data) {
-			console.log(data)
-		}, 'json');			
+			$.each(data.note.note_id, function(i, value) {
+				$('#note_id_'+value).remove();
+			});
+		}, 'json');
 	});
-	
+
 	/*
 	 * Files
 	 */

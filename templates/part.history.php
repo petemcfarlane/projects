@@ -4,6 +4,6 @@
 	$actions = $result->fetchAll();
 
 	foreach ($actions as $action) {
-		print_unescaped( "<p>" . OC_Projects_App::actionDetail($action['uid'], $action['uaction'], $action['target_type'], $action['target_id'], $action['atime']) . "</p>");
+		print_unescaped( "<p>" . OC_Projects_App::actionDetail($action['uid'], $project['id'], $action['uaction'], $action['target_type'], $action['target_id'], $action['atime']) . "</p>");
 	}
 ?>
