@@ -13,29 +13,17 @@ if ($project_id) {
 } else {
 	$project = NULL;
 }
+
+$projects = OC_Projects_App::getProjects($uid);
 ?>
 
 <header>
-	<h1 id="title">
-		<a class="breadcrumb" href="<?php print OCP\Util::linkTo( 'projects', 'index.php' ); ?>">Projects</a>
-		<?php if ($project) { ?><a class='breadcrumb' href="<?php print OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id']; ?>"><?php p( $project['name']); ?></a><?php } ?>
-		<?php if ($view && $view != 'project') { ?><a class='breadcrumb' href="<?php print OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/" . $view; ?>"><?php p( ucfirst($view) ); ?></a><?php } ?>
-	</h1>
+	<ul id="projects_nav" class="breadcrumb">
+		<li><a href="<?php p(OCP\Util::linkTo( 'projects', 'index.php' )); ?>">Projects</a></li>
+		<?php if ($project) { ?><li><span class="divider">/</span> <a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] ); ?>"><?php p( $project['name']); ?></a></li><?php } ?>
+		<?php if ($view && $view != 'project') { ?><li><span class="divider">/</span> <a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/" . $view ); ?>"><?php p( ucfirst($view) ); ?></a></li><?php } ?>
+	</ul>
 </header>
-
-
-
-<?php 
-/*$project_id = 1;
-$uid = 'Steve';
-$action = 'edited';
-$target_type = 'project';
-$target_id = 1;
-$excerpt = 'Project Name - Title';
-$atime = date('Y-m-d H:i:s');
-//print_r( OC_Projects_App::addAction( $project_id, $action, $target_type, $target_id, $excerpt, $uid, $atime ) ); 
-*/?>
-
 
 <section id="main">
 	<?php switch ( $view ) {
@@ -50,6 +38,7 @@ $atime = date('Y-m-d H:i:s');
 	case "events" : include_once("part.events.php"); break;
 	case "issues" : include_once("part.issues.php"); break;
 	case "project" : include_once("part.project.php"); break;
+	case "people" : include_once("part.people.php"); break;
 	default : include_once("part.listprojects.php"); break;
 	} ?>
 </section>

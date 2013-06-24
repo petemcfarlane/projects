@@ -1,6 +1,6 @@
 <?php
 
-// cloud/index.php/apps/projects/12345
+// cloud/index.php/apps/projects/id/12345
 $this->create('project_overview', 'id/{project_id}')->get()->action(
     function($params){
         require __DIR__ . '/../index.php';

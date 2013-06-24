@@ -1,5 +1,4 @@
 <?php
-
 OCP\JSON::checkLoggedIn();
 OCP\JSON::checkAppEnabled('projects');
 OCP\JSON::callCheck();
@@ -10,8 +9,9 @@ if ( isset ( $_POST['new_project'] ) ) {
 	$request = array();
 	$request['name'] = $_POST['name'];
 	$request['description'] = $_POST['description'];
-	$users = array();
-	$request['users'] = "";
+	$creator = OC_User::getUser();
+	$request['creator'] = $creator;
+	$request['users'] = "$creator,";
 	foreach ($_POST['users'] as $user ) {
 		if ($user != '') {
 			$request['users'] .= $user.',';
@@ -37,9 +37,9 @@ if ( isset ( $_POST['new_project'] ) ) {
 	}
 	//archive_project
 	$data['project_id']=$_POST['archive_project'];
-	$data['update_key']='archive';
-	$data['update_value']=1;
-	$response = OC_Projects_App::updateProject($data);
+	$data['update_key']='status';
+	$data['update_value']=5;
+	$response = OC_Projects_App::updateProject($data, "archived", OC_Projects_App::getProjectName($data['project_id']) );
 	OCP\JSON::success(array("archived_project" => $response));
 	exit;
 	
@@ -54,25 +54,22 @@ if ( isset ( $_POST['new_project'] ) ) {
 	}
 	// un-archive_project
 	$data['project_id']=$_POST['restore_archived_project'];
-	$data['update_key']='archive';
-	$data['update_value']=0;
-	$response = OC_Projects_App::updateProject($data);
+	$data['update_key']='status';
+	$data['update_value']=1;
+	$response = OC_Projects_App::updateProject($data, "restored", OC_Projects_App::getProjectName($data['project_id']) );
 	OCP\JSON::success(array("restored_project" => $response));
 	exit;
 	
 
-} elseif ( isset($_POST['id']) && $_POST['id'] !== '' ) {
+} elseif ( isset($_POST['project_id']) && $_POST['project_id'] !== '' ) {
 // Update Project
-	$data['id'] = $_POST['id'];
+	$data['project_id'] = $_POST['project_id'];
 	foreach($_POST as $key => $value) {
-		if ($key !== 'id') {
-			$data["key"] = $key;
-			$data["value"] = $value;
+		if ($key !== 'project_id') {
+			$data["update_key"] = $key;
+			$data["update_value"] = $value;
 		}
 	}
-
-	$response = OC_Projects_App::updateProject($data);
-	
-	print json_encode($response);
-	
+	$response = OC_Projects_App::updateProject($data, "edited", "$data[update_key] => $data[update_value]");
+	OCP\JSON::success(array("restored_project" => $response));
 }

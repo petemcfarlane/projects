@@ -1,8 +1,8 @@
-$(document).ready(function(){
+$(document).ready(function () {
 	
 	/*
 	 * PJAX
-	 */ 
+	 */
 	
 	if ($.support.pjax) {
 		$(document).pjax('#content a', '#content'); // every 'a' within '#content' to be clicked will load the content in '#content'
@@ -55,11 +55,20 @@ $(document).ready(function(){
 	
 	// New project button clicked
 	$('#content').on('click', '#new_project_button', function() {
-		$.post(OC.filePath('projects', 'templates', 'part.new.php'), function(data) {
+		$.get(OC.filePath('projects', 'templates', 'part.new.php'), function(data) {
 			$('#main').html(data);
 			$('#new_project_form #name').focus();
 		});
 	});
+	// select users
+	$('#content').on('change', '#users li input[type="checkbox"]', function() {
+		if ($(this).prop('checked')) {
+			$(this).parent().parent().addClass('checked');
+		} else {
+			$(this).parent().parent().removeClass('checked');
+		}
+	})
+	
 	// Submit new project
 	$('#content').on('submit', '#new_project_form', function(e) {
 		e.preventDefault();
@@ -68,12 +77,12 @@ $(document).ready(function(){
 			$.pjax({url: url, container: '#content'});
 		}, "json");
 	});
+	
 	// Archive project
 	$('#content').on('click', '#archive_project', function(e) {
 		e.preventDefault();
 		if (confirm('Do you really want to archive this project?')) {
 			$.post( OC.filePath('projects', 'ajax', 'edit_project.php'), 'archive_project='+$(this).attr('data-project_id'), function(data) {
-				console.log(data);
 				var url = OC.filePath('projects', null, 'index.php');
 				$.pjax({url: url, container: '#content'});
 			}, "json");
@@ -82,7 +91,13 @@ $(document).ready(function(){
 	
 	// Show archived projects 
 	$('#content').on('click', '#show_archived_projects', function() {
-		$('#archived_project_list').toggle();
+		if ( $('#archived_project_list').hasClass('hidden') ) {
+			$('#archived_project_list').removeClass('hidden');
+			$('#show_archived_projects').html('<i class="icon-trash"></i> Hide Trash');
+		} else {
+			$('#archived_project_list').addClass('hidden');
+			$('#show_archived_projects').html('<i class="icon-trash"></i> Show Trash');
+		}
 	});
 	
 	// Restore project
@@ -100,10 +115,20 @@ $(document).ready(function(){
 
 	// Ajax edit details
 	$('#content').on("change", "#edit_details input, #edit_details textarea, #edit_details select", function() {
-		var post = $(this).serialize()+'&id='+($('#project_id').val())
-		$.post( OC.filePath('projects', 'ajax', 'edit_project.php'), post, function(data) {
-			console.log(data);
-		}, "json");
+		var input = $(this)
+		$.ajax({
+			url: OC.filePath('projects', 'ajax', 'edit_project.php'), 
+			data: input.serialize()+'&project_id='+($('#project_id').val()),
+			type: "POST",
+			dataType: 'json',
+			beforeSend: function() {
+				input.parent().addClass('loading_details');
+			},
+			success: function(data) {
+				input.parent().removeClass('loading_details');
+			}
+		});
+
 	});
 
 	/*
@@ -112,7 +137,6 @@ $(document).ready(function(){
 	
 	// Ajax add task
 	$('#content').on('click', '#new_task_button', function() {
-		$(this).fadeOut("fast");
 		$('#new_task').fadeIn("fast").draggable();
 		$('#new_summary').focus();
 	});
@@ -131,12 +155,10 @@ $(document).ready(function(){
 			populateTask(data.task);
 			
 			$('#new_task').hide();
-			$('#new_task_button').show();
 		}, "json");
 	});
 	$('#content').on('click', '#cancel_new_task', function() {
 		$('#new_task').fadeOut("fast");
-		$('#new_task_button').fadeIn("fast");		
 	});
 	
 	// Ajax complete task
@@ -302,8 +324,14 @@ $(document).ready(function(){
 	});
 	
 	// show trashed notes
-	$('#content').on('click', '#show_trash', function() {
-		$('.trash').not('#trash_template').fadeToggle('fast');		
+	$('#content').on('click', '#show_trash_notes', function() {
+		if ($('#trash_notes_list').hasClass('hidden')) {
+			$('#trash_notes_list').removeClass('hidden');
+			$('#show_trash_notes').html('<i class="icon-trash"></i> Hide Trash');
+		} else {
+			$('#trash_notes_list').addClass('hidden');
+			$('#show_trash_notes').html('<i class="icon-trash"></i> Show Trash');
+		}
 	});
 	
 	// restore note
@@ -329,6 +357,36 @@ $(document).ready(function(){
 			});
 		}, 'json');
 	});
+	
+	
+	/*
+	 * People
+	 */
+	
+	$('#content').on('click', '#people li', function() {
+		var person = $(this);
+		if ( person.hasClass('creator') ) return false; 
+		var uid = person.attr('data-uid'), project_id = $('#people').attr('data-project_id')
+		$.ajax(
+			{
+				url: OC.filePath('projects', 'ajax', 'edit_people.php'), 
+				data: "toggle_uid="+uid+"&project_id="+project_id,
+				type: "POST",
+				dataType: 'json',
+				beforeSend: function() {
+					person.find('.loading_person').show();
+				},
+				success: function(data) {
+					person.find('.loading_person').hide();
+					if (data.current_user) {
+						$('#people li[data-uid="'+uid+'"]').addClass('current');
+					} else {
+						$('#people li[data-uid="'+uid+'"]').removeClass('current');
+					}
+				}
+			}
+		);
+	})
 
 	/*
 	 * Files
@@ -349,199 +407,6 @@ $(document).ready(function(){
 		
 	});
 	
-	/*$('#project_menu button').click(function() {
-		$('.view_section').hide();
-	});
-
-	$('#view_details').click(function() {
-		$('#details').show();
-	});
-
-	$('#view_people').click(function() {
-		$('#people').show();
-	});
-
-	$('#view_aims').click(function() {
-		$('#aims').show();
-	});
-
-	$('#view_timeline').click(function() {
-		$('#timeline').show();
-	});
-
-	$('#view_order').click(function() {
-		$('#order').show();
-	});
-
-	$('#view_meetings').click(function() {
-		$('#meetings').show();
-		$.post (OC.filePath('projects', 'ajax', 'view_meetings.php'), 'id='+$('#project_id').val(), function(data) {
-			$('#meetings_list').empty();
-			$.each(data, function(i, meeting){
-				$('#meetings_list').append('<a class="select_meeting" data-id="' + data[i]['id'] + '">' + data[i]['date'] + '</a>');
-			});
-		}, "json");
-	});
-
-	$('.ajax_update input, .ajax_update textarea').change(function() {
-		var post = $(this).serialize()+'&id='+($('#project_id').val())
-		$.post( OC.filePath('projects', 'ajax', 'update_project.php'), post, function(data) {
-			console.log(data);
-		}, "json");
-	});
-	
-	$('#add_meeting').click(function() {
-		$('#add_meeting_form').show();
-	});
-
-	$('#add_meeting_form').submit(function(event) {
-		event.preventDefault();
-		var post = $('#add_meeting_form').serialize();
-		$.post (OC.filePath('projects', 'ajax', 'add_meeting.php'), post, function(data) {
-			console.log(data);
-		});
-	});
-	
-	$('#meetings_list').on('click', '.select_meeting', function(event) {
-		event.preventDefault();
-		$.post (OC.filePath('projects', 'ajax', 'view_meetings.php'), 'meeting_id='+$(this).attr('data-id'), function(data) {
-			console.log(data);
-			$.each(data, function(key, value) {
-				$('#meetings_display').append('<p><label>' + key + '</label>: ' + value + '</p>');
-			});
-		}, "json");
-	});
-
-	$('#project_name_label').click(function() {
-		$('#project_name_label').hide();
-		$('#project_name').show();
-		$('#project_description_label').hide();
-		$('#project_description').show();
-		$('#project_name').blur(function() {
-			$('#project_name_label').html($('#project_name').val()).show();
-			$('#project_name').hide();
-		});
-		$('#project_description').blur(function() {
-			$('#project_description_label').html($('#project_description').val()).show();
-			$('#project_description').hide();
-		});
-	})
-	
-	$('#project_description_label').click(function() {
-		$('#project_description_label').hide();
-		$('#project_description').show();
-		$('#project_description').blur(function() {
-			$('#project_description_label').html($('#project_description').val()).show();
-			$('#project_description').hide();
-		});
-	})
-	
-	$('.invitees').on('focus','.invitee input',function() {
-		$(this).parent().addClass('focus');
-	});
-
-	$('.invitees').on('blur','.invitee input',function() {
-		$(this).parent().removeClass('focus');
-		if ($(this).val().length > 0) {
-			$(this).parent().removeClass('blank');
-		} else {
-			$(this).parent().addClass('blank');
-		}
-	});
-
-	$('#new_project_form').on('click','.remove', function() {
-		$(this).parent().animate({opacity:0}, 300).animate({height:0},200, function() {$(this).remove();});
-	});
-	
-	$('#new_project_form #name').focus();
-	
-	$('#new_project_form').on('keyup','.invitee input', function(event) {
-		if (event.which == 13 || event.which == 40 || event.which == 38 || event.which == 9) {
-			return false;
-		}
-
-		var input = $(this);
-
-		if ( input.val().length > 1 ) {
-			$.post (OC.filePath('projects', 'ajax', 'lookup_users.php'), 'name='+$(this).val(), function(data) {
-				$(input).parent().find('.suggestions').empty();
-				if (data['groups'].length > 0) {
-					$.each(data['groups'], function(i) {
-						$(input).parent().find('.suggestions').append("<li>"+data['groups'][i]['gid']+"</li>");
-					});
-				}
-				if (data['users'].length > 0) {
-					$.each(data['users'], function(i) {
-						$(input).parent().find('.suggestions').append("<li>"+data['users'][i]['uid']+"</li>");
-					});
-				}
-				input.parent().find('.suggestions li:first-child').addClass('selected');
-			}, "json");
-
-		} else {
-
-			input.parent().find('.suggestions').empty();
-
-		}
-		
-	});
-	
-	$('#new_project_form').on('click','.suggestions li', function() {
-		$(this).parent().parent().find('input').val($(this).html());
-		$(this).parent().parent().next().find('input').focus();
-		$(this).parent().empty();
-		addInvitee();
-	});
-
-	$('#new_project_form').on('keydown','.invitee input', function(event) {
-		if ( event.which == 13 || event.which == 9 ) { // return or tab
-			event.preventDefault();
-			$(this).val($(this).parent().find('.suggestions li.selected').html());
-			$(this).parent().next().find('input').focus();
-			$(this).parent().find('.suggestions').empty();
-			addInvitee();
-		}
-		
-		if (event.which == 40) { //down
-			var old = $('.suggestions li.selected');
-			if (old.next().length > 0 ) {
-				old.removeClass('selected');
-				old.next().addClass('selected');
-			}
-		}
-
-		if (event.which == 38) { //up
-			var old = $('.suggestions li.selected');
-			if (old.prev().length >0 ) {
-				old.removeClass('selected');
-				old.prev().addClass('selected');
-			}
-		}
-	});
-
-	function addInvitee() {
-		if ( $('.invitees .blank').length < 2 ) {
-			$('.invitees').append('<div class="person invitee blank"><div class="icon"></div><input name="users[]" type="text" autocomplete="off" /><a class="remove"></a><ul class="suggestions"></ul></div>');
-		}
-	}
-
-	$('.invitees').on('hover', '.suggestions li', function() {
-		$('.suggestions li.selected').removeClass('selected');
-		$(this).addClass('selected');
-	});
-	
-
-	// Sidebar, show closed projects
-	$('#closed_title').toggle(function() {
-		$('ul#projects').animate({bottom: "22em"});
-		$('#closed_projects_wrapper').animate({height: "25em"});
-	}, function() {
-		$('#closed_projects_wrapper').animate({height: "3em"});
-		$('ul#projects').animate({bottom: "0"});
-	});
-	
-*/
-
 
 
 });

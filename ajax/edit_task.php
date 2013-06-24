@@ -10,12 +10,13 @@ if ( isset($_POST['type']) && $_POST['type'] == 'complete') {
 	$vtodo = $vcalendar->VTODO;
 	OC_Projects_App::setComplete($vtodo, $_POST['checked'], null);
 	if ( OC_Calendar_Object::edit($_POST['id'], $vcalendar->serialize()) ) {
-		$updateAction = OC_Projects_App::updateAction( $_POST['project_id'], $action = $_POST['checked'] ? "task_completed" : "task_uncompleted", "task", $_POST['id'] );
+		//$updateAction = OC_Projects_App::updateAction( $_POST['project_id'], $action = $_POST['checked'] ? "task_completed" : "task_uncompleted", "task", $_POST['id'] );
 		$task_info = OC_Projects_App::arrayForJSON($_POST['id'], $vtodo, OC_Calendar_App::getTimezone());
-		OCP\JSON::success(array('data' => $task_info, 'updateAction' => $updateAction));
+		OCP\JSON::success(array('data' => $task_info));
 	}
 	exit;
 }
+
 
 // delete task
 if ( isset($_POST['type']) && $_POST['type'] == 'delete') {
@@ -24,6 +25,8 @@ if ( isset($_POST['type']) && $_POST['type'] == 'delete') {
 	OCP\JSON::success(array('data' => array( 'id' => $_POST['id'] )));
 	exit;
 }
+
+
 // update task
 if ( isset($_POST['type']) && $_POST['type'] == 'update') {
 	$vcalendar = OC_Calendar_App::getVCalendar( $_POST['id'] );
@@ -54,6 +57,7 @@ if ( isset($_POST['type']) && $_POST['type'] == 'update') {
 	}
 	exit;
 }
+
 
 // If no calendar exists for the project yet
 if ( $_POST['calendar_id'] === '0' ){
@@ -90,6 +94,7 @@ if ( $_POST['calendar_id'] === '0' ){
 	//OCP\JSON::success(array("calendar_id" => $new_calendar_id));
 	$_POST['calendar_id'] = $new_calendar_id;
 }
+
 
 // Once we have the calendar and the user has shared permissions, create the task
 if ( isset($_POST['project_id']) && $_POST['project_id'] !== '' ) {
