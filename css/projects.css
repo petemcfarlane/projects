@@ -9,10 +9,18 @@ a:hover, a:focus {text-decoration: underline;}
 a:hover, a:active {outline: 0;}
 h2 {font-weight: bold;font-size: 1.2em;}
 p {margin: 1em 0;}
+.center {text-align:center;}
+
+/*
+ * Glyphicons
+ */
+
 [class^="icon-"], [class*=" icon-"] {display: inline-block;width: 14px;height: 14px;margin-top: 1px;line-height: 14px;vertical-align: text-top;background-image: url("%appswebroot%/projects/img/glyphicons-halflings.png");background-position: 14px 14px;background-repeat: no-repeat;}
 .icon-plus {background-position: -408px -96px;}
 .icon-trash {background-position: -456px 0;}
 .icon-pencil {background-position: 0 -72px;}
+.icon-remove {background-position: -312px 0;}
+.icon-ok {background-position: -288px 0;}
 
 /*
  * Header
@@ -45,14 +53,16 @@ p {margin: 1em 0;}
  * Projects
  */
 
-#project_list {margin: 1em 0;}
-#project_list li a {display: block; border: 1px solid #eee; border-radius: 0.5em; padding: 1em; margin: 0 1em 1em 0;box-shadow: 0 5px 5px -5px #CCC;}
-.status-in_progress {background: #DFF0D8;border: 1px solid #D6E9C6;color: #468847;}
+.project_list {margin: 1em 0;}
+.project_list li a {display: block; border: 1px solid #eee; border-radius: 0.5em; padding: 1em; margin: 1em;box-shadow: 0 5px 5px -5px #CCC;}
+.project_list li a:hover {text-decoration: none;}
+.project_list .description {color: #666;}
+#show_archived_projects_container {text-align: center;border-bottom: 1px solid #EEE;margin: 1em 0em 2em;height: 1.4em;}
+/*.status-in_progress {background: #DFF0D8;border: 1px solid #D6E9C6;color: #468847;}
 .status-hold {background: #FCF8E3;border: 1px solid #FBEED5;color: #C09853;}
 .status-issue {background: #F2DEDE;border: 1px solid #EED3D7;color: #B94A48;}
 .status-complete {background: #D9EDF7;border: 1px solid #BCE8F1;color: #3A87AD;}
-.status-archive {background: #CECECE;border: 1px solid #D3D3D3;color: #494949;}
-#show_archived_projects_container {text-align: center;border-bottom: 1px solid #EEE;margin: 1em 1em 2em;height: 1.4em;}
+.status-archive {background: #CECECE;border: 1px solid #D3D3D3;color: #494949;}*/
 
 /*
  * New project
@@ -75,11 +85,18 @@ p {margin: 1em 0;}
  */
 
 p.loading_details {opacity:.5;}
+#edit_details input[type="text"] {border: none;box-shadow: none;background: #FFF;border-bottom: dotted 1px #fff;border-radius: 0;width: 50%;color: #000;padding: 0; -o-transition: border-color 0.4s; -webkit-transition: border-color 0.4s; -moz-transition: border-color 0.4s;transition: border-color 0.4s;}
+#edit_details input[type="text"]:hover {border-bottom: dotted 1px #ccc;-}
+#edit_details input[type="text"]:focus {border-bottom: dotted 1px #AAA;}
+#edit_details #project_name {font-size:2em;margin: 0;}
+#edit_details #project_description {margin: 0;}
+#edit_details label {color: #666;font-weight: normal;}
 
 /*
  * Tasks
  */
 
+#new_task_button {margin: 1.5em auto;display: block;}
 #tasks {white-space:normal;}
 #tasks td {vertical-align: top; padding: 1em;}
 .priority {color: #CE0101; font-weight: bold; margin:0.5em;}
@@ -107,19 +124,19 @@ input[type="checkbox"].complete_checkbox {margin-top: 3px;}
 .note:hover button {opacity:1;}
 #new_note {display:none;min-width: 260px;border: 1px solid #F2F2F2;border-radius: 4px;position: fixed;left: 40%;top: 20%;background: #FFF;padding: 1em;box-shadow: 0 3px 15px #818181;}
 #note {width: 96%;margin: 0;padding: 2%;min-height: 70px;}
-
 #note_template, #trash_template {display:none;}
-
 .note textarea {background: #FFF;border: none;margin: 0;padding: 0;box-shadow: none;width: 100%;resize:none;border-radius:0;}
-#show_trash_notes_container {text-align: center;border-bottom: 1px solid #EEE;margin: 1em 1em 2em;height: 1.4em;}
+#show_trash_notes_container {text-align: center;border-bottom: 1px solid #EEE;margin: 1em 0 2em;height: 1.4em;}
 
 /*
  * People
  */
 
 .thumbnail_40 {border-radius: 50%;max-width: 40px;}
-#people li img {vertical-align: middle;}
-#people li {opacity: .4; margin: 0.5em 0;}
-#people li:hover {opacity:0.7;}
-#people li.current {opacity:1;}
-#people li.creator {font-weight: bold;}
+#people {text-align: center;margin: 1em;}
+#people li {display: inline-block;opacity: 0.7;margin: 0.6em 0.5em;}
+#people li label {display: block;padding: 1em;text-align: center;border: 1px solid #F2F2F2;border-radius: 4px;background: #FFF;font-weight:normal;}
+#people li.checked {opacity: 1;}
+#people li.checked label {box-shadow: 0 3px 5px #B1B1B1;}
+#people li label img {display: block;margin: 0 auto 0.6em;cursor:pointer;}
+#people li label input[type='checkbox'] {display: block;margin: 0 auto;margin: 0.5em auto 0;}

@@ -1,6 +1,6 @@
 <button id="new_project_button"><i class="icon-plus"></i> New Project</button>
 
-<ul id="project_list">
+<ul class="project_list">
 	<?php foreach ($projects as $project) { ?>
 		<li>
 			<a href="<?php print OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id']; ?>" class="<?php switch($project['status']) {
@@ -21,7 +21,7 @@
 							break;
 						} ?>">
 			<h2><?php p($project['name']); ?></h2>
-			<span><?php p($project['description']); ?></span>
+			<span class="description"><?php p($project['description']); ?></span>
 			</a>
 		</li>
 	<?php } ?>
@@ -30,8 +30,8 @@
 <div id="show_archived_projects_container"><button id="show_archived_projects"><i class="icon-trash"></i> Show Trash</button></div>
 
 <?php $archived_projects = OC_Projects_App::getArchivedProjects($uid); ?>
-<ul id="archived_project_list" class="hidden">
+<ul class="project_list hidden" id="archived_project_list">
 	<?php foreach ($archived_projects as $project) { ?>
-		<li><?php p($project['name']); ?> - <a class='restore_archived_project' data-project_id="<?php p($project['id']); ?>">Restore</a></li>
+		<li><a class='restore_archived_project' data-project_id="<?php p($project['id']); ?>"><h2><?php p($project['name']); ?></h2>Restore</a></li>
 	<?php } ?>
 </ul>

@@ -19,7 +19,7 @@ $projects = OC_Projects_App::getProjects($uid);
 
 <header>
 	<ul id="projects_nav" class="breadcrumb">
-		<li><a href="<?php p(OCP\Util::linkTo( 'projects', 'index.php' )); ?>">Projects</a></li>
+		<li><a href="<?php p(OCP\Util::linkTo( 'projects', 'index.php' )); ?>">All Projects</a></li>
 		<?php if ($project) { ?><li><span class="divider">/</span> <a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] ); ?>"><?php p( $project['name']); ?></a></li><?php } ?>
 		<?php if ($view && $view != 'project') { ?><li><span class="divider">/</span> <a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/" . $view ); ?>"><?php p( ucfirst($view) ); ?></a></li><?php } ?>
 	</ul>

@@ -31,7 +31,7 @@ foreach( $calendar_tasks as $task ) {
 }
 ?>
 
-<button id="new_task_button">Create a new task</button>
+<button id="new_task_button"><i class="icon-plus"></i> New task</button>
 
 <form id="new_task" class="hidden">
 	<input type="hidden" id="project_id" name="project_id" value="<?php p($project['id']); ?>" />
@@ -60,7 +60,7 @@ foreach( $calendar_tasks as $task ) {
 		<textarea placeholder="Notes" name="description" id="new_notes"></textarea>
 	</p>
 	<p>
-		<input type="submit" name="add_task" id="new_add" value="Add this task" /> or <a id="cancel_new_task">cancel this task</a>
+		<button name="add_task" id="new_add" ><i class='icon-plus'></i>Add this task</button> or <button id="cancel_new_task" class="tag"><i class="icon-remove"></i> Cancel task</button>
 	</p>
 </form>
 
@@ -93,9 +93,9 @@ foreach( $calendar_tasks as $task ) {
 		<textarea id="notes" name="notes" placeholder="Notes"></textarea>
 	</p>
 	<p>
-		<button id="update_task">Save changes</button>
-		<button id="cancel_task">Cancel</button>
-		<button id="delete_task">Delete</button>
+		<button id="update_task"><i class="icon-ok"></i> Save changes</button>
+		<button id="cancel_task"><i class="icon-remove"></i> Cancel</button>
+		<button id="delete_task"><i class="icon-trash"></i> Delete</button>
 	</p>
 </form>
 

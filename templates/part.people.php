@@ -16,13 +16,15 @@ $users = array();
 
 // display list of users
 ?>
+<h2 class="center">Select which users you want to collaberate with.</h2>
+<p class="center">You can't remove the project creator.</p>
+
 <ul id="people" data-project_id="<?php p($project['id']); ?>">
 	<?php foreach ($users as $user => $u) { ?>
-		<li class="<?php p (isset($u['current_user']) ? "current " : "" ); p(isset($u['creator']) ? "creator": ""); ?>" data-uid="<?php p($user); ?>">
-			<img class="thumbnail_40" src="<?php p( OCP\Util::linkTo( 'user_photo', 'index.php' ) . "/photo/$user/40" ); ?>" />
-			<?php p($u['name']); ?>
-			<?php print_unescaped(isset($u['creator']) ? "<em style='font-weight:normal;'>(creator)</em>" : "" ); ?>
-			<em class="hidden loading_person">loading...</em>
-		</li>
+		<li<?php print ( isset($u['creator']) || isset($u['current_user']) ) ? " class='checked'": ""; ?> data-uid="<?php print $user; ?>"><label>
+			<img class="thumbnail_60" src="<?php print( OCP\Util::linkTo( 'user_photo', 'index.php' ) . "/photo/$user/60" ); ?>" />
+			<?php print $u['name']; ?>
+			<input type="checkbox" name="users[]" value="<?php print $user; ?>" <?php print isset($u['current_user']) ? 'checked' : ''; ?><?php print isset($u['creator']) ? " disabled": ""; ?>/>
+		</label></li>
 	<?php } ?>
 </ul>

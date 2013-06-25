@@ -35,28 +35,28 @@
 				<name>project_type</name>
 				<type>text</type>
 				<length>64</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>platform</name>
 				<type>text</type>
 				<length>64</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>technical_authority</name>
 				<type>text</type>
 				<length>64</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>commercial_authority</name>
 				<type>text</type>
 				<length>64</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
@@ -76,41 +76,41 @@
 				<name>technical_aims</name>
 				<type>text</type>
 				<length>150</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>present_quotation</name>
 				<type>text</type>
 				<length>64</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>negotiate_order</name>
 				<type>text</type>
 				<length>64</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>requirements</name>
 				<type>text</type>
 				<length>250</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>commercial_aims</name>
 				<type>text</type>
 				<length>150</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>notes</name>
 				<type>clob</type>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
@@ -175,35 +175,35 @@
 				<name>territories</name>
 				<type>text</type>
 				<length>150</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>retailers</name>
 				<type>text</type>
 				<length>150</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>bom</name>
 				<type>text</type>
 				<length>50</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>rrp</name>
 				<type>text</type>
 				<length>50</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
 				<name>license_fee</name>
 				<type>text</type>
 				<length>50</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
@@ -218,7 +218,7 @@
 				<name>odm_oem</name>
 				<type>text</type>
 				<length>150</length>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 			</field>
 
 			<field>
