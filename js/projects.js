@@ -1,16 +1,16 @@
 $(document).ready(function () {
 	
-	/*
+	/* ------------------------
 	 * PJAX
-	 */
+	 * -----------------------*/
 	
 	if ($.support.pjax) {
 		$(document).pjax('#content a', '#content'); // every 'a' within '#content' to be clicked will load the content in '#content'
 	}
 	
-	/*
-	 * Globals
-	 */
+	/* ------------------------
+	 * Functions
+	 * -----------------------*/
 	
 	function formatDate(date) {
 		
@@ -54,9 +54,9 @@ $(document).ready(function () {
 			}
 	}
 	
-	/*
+	/* ------------------------
 	 * Projects
-	 */
+	 * -----------------------*/
 	
 	// New project button clicked
 	$('#content').on('click', '#new_project_button', function() {
@@ -136,12 +136,13 @@ $(document).ready(function () {
 
 	});
 
-	/*
+	/* ------------------------
 	 * Tasks
-	 */
+	 * -----------------------*/
 	
 	// Ajax add task
 	$('#content').on('click', '#new_task_button', function() {
+		$('#new_task input, #new_task textarea').val('');
 		$('#new_task').draggable().fadeIn("fast");
 		$('#new_task #new_summary').focus();
 	});
@@ -249,9 +250,9 @@ $(document).ready(function () {
 		}
 	}
 
-	/*
+	/* ------------------------
 	 * Notes
-	 */
+	 * -----------------------*/
 	
 	// on add new note
 	$('#content').on('click', '#new_note_button', function() {
@@ -352,9 +353,9 @@ $(document).ready(function () {
 	});
 	
 	
-	/*
+	/* ------------------------
 	 * People
-	 */
+	 * -----------------------*/
 	
 	$('#content').on('change', '#people li input', function() {
 		var person = $(this).parent().parent();
@@ -380,10 +381,42 @@ $(document).ready(function () {
 			}
 		);
 	})
+	
+	
+	/* ------------------------
+	 * History
+	 * -----------------------*/
 
-	/*
+	var loading_events = false;
+
+	$('#content').on('click', '#load_more_events', function() {
+		if (loading_events) return false;
+
+		var project_id = $(this).attr("data-project_id"), offset = $(this).attr("data-offset");
+		
+		$.ajax({
+			url: OC.filePath('projects', 'ajax', 'load_history.php'),
+			type: 'POST',
+			data: "project_id=" + project_id + "&offset=" + offset,
+			beforeSend: function() {
+				loading_events = true;
+				$('#load_more_events').html("<i class='icon-download'></i> Loading...");
+			},
+			success: function(data) {
+				if (data) {
+					$('#load_more_events').before(data);
+					$('#load_more_events').html("<i class='icon-download'></i> Load more events").attr("data-offset", parseInt(offset)+20);
+					loading_events = false;
+				} else {
+					$('#load_more_events').html("<i class='icon-download'></i> No more events to load");
+				}
+			}
+		});
+	});
+
+	/* ------------------------
 	 * Files
-	 */
+	 * -----------------------*/
 	
 	$('#content').on('change', '#file_upload_start', function() {
 		var data = new FormData(document.getElementById('upload-form'));

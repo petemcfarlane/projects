@@ -31,16 +31,18 @@ foreach( $calendar_tasks as $task ) {
 }
 	
 	// Arrange tasks by $task['complete']
-	$sortArray = array();
-	foreach($tasks as $task) {
-		foreach($task as $key=>$value) {
-			if(!isset($sortArray[$key])) {
-				$sortArray[$key]=array();
+	if ($tasks) { 
+		$sortArray = array();
+		foreach($tasks as $task) {
+			foreach($task as $key=>$value) {
+				if(!isset($sortArray[$key])) {
+					$sortArray[$key]=array();
+				}
+				$sortArray[$key][]=$value;
 			}
-			$sortArray[$key][]=$value;
 		}
+		array_multisort($sortArray['complete'], SORT_ASC, $tasks);
 	}
-	array_multisort($sortArray['complete'], SORT_ASC, $tasks);
 ?>
 
 <button id="new_task_button"><i class="icon-plus"></i> New task</button>

@@ -78,16 +78,22 @@ if ( $_POST['calendar_id'] === '0' ){
 	
 	// Share the calendar, full privs, with all users.
 	try {
-		$token = OCP\Share::shareItem("calendar", $new_calendar_id, 0, "Chris", 31);
+		$query = OCP\DB::prepare( "SELECT users, creator FROM *PREFIX*projects WHERE id = ?");
+		$result = $query->execute( array( $_POST['project_id']) );
+		$result = $result->fetchRow();
+		$users = explode(',', $result['users'], -1);
+		foreach ($users as $user) {
+			if ($user != $result['creator']) OCP\Share::shareItem("calendar", $new_calendar_id, 0, $user, 31);
+		}
 	} catch (Exception $e) {
 		throw new Exception( 'Failed to share calendar ['. OC_Projects_App::getProjectName($_POST['project_id']).'] ' . $e);
 		print json_encode($e->getMessage());
 	}
 
 	// Update the project with the calendar ID
-	$data['id'] = $_POST['project_id'];
-	$data['key'] = "calendar_id";
-	$data['value'] = $new_calendar_id;
+	$data['project_id'] = $_POST['project_id'];
+	$data['update_key'] = "calendar_id";
+	$data['update_value'] = $new_calendar_id;
 	OC_Projects_App::updateProject($data);
 	
 	// Return the new calendar ID to the page to update the form 'calendar_id' value, so no more calendars will be created

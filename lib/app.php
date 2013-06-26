@@ -436,26 +436,28 @@ Class OC_Projects_App {
 	 */
 
 	/**
-	 * @brief toggle person belonging to project
+	 * @brief toggle person belonging to project, and can share/unshare calendar, if exists
 	 * @param string $uid
 	 * @param number $project_id
 	 * @return array 
 	 */
 	public static function togglePerson($uid, $project_id) {
-		$query = OCP\DB::prepare( "SELECT users FROM *PREFIX*projects WHERE id = ?");
+		$query = OCP\DB::prepare( "SELECT users, calendar_id FROM *PREFIX*projects WHERE id = ?");
 		$result = $query->execute( array($project_id) );
-		$users = $result->fetchRow();
-		$users = explode(',', $users['users'], -1);
+		$result = $result->fetchRow();
+		$users = explode(',', $result['users'], -1);
 		if (($key = array_search($uid, $users)) !== false) {
 			unset($users[$key]);
 			$users = implode(',', $users) . ",";
 			$current_user = false;
 			$action = "removed";
+			if ($result['calendar_id'] != 0 ) OCP\Share::unshare("calendar", $result['calendar_id'], 0, $uid);
 		} else {
 			$users[] = $uid;
 			$users = implode(',', $users) . ",";
 			$current_user = true;
 			$action = "invited";
+			if ($result['calendar_id'] > 0 ) OCP\Share::shareItem("calendar", $result['calendar_id'], 0, $uid, 31);
 		}
 		$query = OCP\DB::prepare( "UPDATE *PREFIX*projects SET users = ? WHERE id = ?");
 		$query->execute( array($users, $project_id) );
