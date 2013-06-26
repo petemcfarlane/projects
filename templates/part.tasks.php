@@ -29,6 +29,18 @@ foreach( $calendar_tasks as $task ) {
 		OCP\Util::writeLog('tasks', $e->getMessage(), OCP\Util::ERROR);
 	}
 }
+	
+	// Arrange tasks by $task['complete']
+	$sortArray = array();
+	foreach($tasks as $task) {
+		foreach($task as $key=>$value) {
+			if(!isset($sortArray[$key])) {
+				$sortArray[$key]=array();
+			}
+			$sortArray[$key][]=$value;
+		}
+	}
+	array_multisort($sortArray['complete'], SORT_ASC, $tasks);
 ?>
 
 <button id="new_task_button"><i class="icon-plus"></i> New task</button>
@@ -99,35 +111,74 @@ foreach( $calendar_tasks as $task ) {
 	</p>
 </form>
 
-<table id="tasks">
-	<?php foreach($tasks as $task) { ?>
-		<tr class="task" data-task_id="<?php p($task['id']); ?>">
-			<td>
-				<input data-task_id="<?php p($task['id']); ?>" class="complete_checkbox" type="checkbox" name="complete"<?php print_unescaped($task['complete'] == 100 ? " checked=\"checked\"" : "" ); ?> />
-			</td>
-			<td class="priority" data-priority="<?php p($task['priority']); ?>">
-				<?php if ($task['priority'] > 6 && $task['priority'] <= 9) {
-					p('!');
-				} elseif ($task['priority'] > 3 && $task['priority'] < 7) {
-					p('!!');
-				} elseif ($task['priority'] >= 1 && $task['priority'] < 4) {
-					p('!!!');
-				} else {
-					
-				}?>
-			</td>
-			<td>
-				<h2 class="task_summary"><?php p($task['summary']); ?></h2>
-				<p class="task_description"><?php p($task['description']); ?></p>
-			</td>
-			<td class="due-date" data-due="<?php if($task['due']) p(date("Y-m-d", $task['due'])); ?>" data-assign="<?php p($task['assigned_to']); ?>">
-				<?php if($task['due']) p( "Due " . date("D, M j", $task['due']) ); ?><br />
-				<?php if($task['assigned_to']) p( "Assigned to " . $task['assigned_to']); ?>
-			</td>
-			<td class="completed-date">
-				<?php if($task['completed']) p( "Completed " . date("D, M j", strtotime($task['completed'] )) ); ?><br />
-				<?php if($task['completed_by']) p ( "By " . $task['completed_by'] ); ?>
-			</td>
-		</tr>
-	<?php } ?>
-</table>
+<ul id="tasks">
+	<li class="task hidden" id="task_template">
+		<input class="task_complete" type="checkbox" name="complete" />
+		<span class="task_priority"></span>
+		<h2 class="task_summary"></h2>
+		<p class="task_description"></p>
+		<p class="task_meta"></p>
+	</li>
+
+	<?php
+	function getPriority($priority) {
+		if ($priority > 6 && $priority <= 9) { // low
+			p('!');
+		} elseif ($priority > 3 && $priority < 7) { // medium
+			p('!!');
+		} elseif ($priority >= 1 && $priority < 4) { // high
+			p('!!!');
+		} 
+	}
+	
+	foreach($tasks as $task) {
+		$meta = array();
+		if ($task['complete'] == 100) {
+			if ($task['completed_by']) $meta[] = "Completed by $task[completed_by]";
+			if ($task['completed']) $meta[] = date("D, M j", strtotime($task['completed'] ));
+		} elseif ($task['assigned_to'] || $task['due']) {
+			if ($task['assigned_to']) $meta[] = $task['assigned_to'];
+			if ($task['due']) $meta[] = date("D, M j", $task['due']);
+		}
+		?>
+		<li class="task<?php p( $task['completed'] ? ' complete' : '' ); ?>" data-task_id="<?php p($task['id']); ?>">
+			<input class="task_complete" type="checkbox" name="complete"<?php p($task['complete'] == 100 ? " checked" : "" ); ?>/>
+			<span class="task_priority" data-priority="<?php p($task['priority']); ?>"><?php p(getPriority($task['priority'])); ?></span>
+			<h2 class="task_summary"><?php p($task['summary']); ?></h2>
+			<p class="task_description"><?php p($task['description']); ?></p>
+			<p class="task_meta<?php p($meta ? '' : ' hidden'); ?>"<?php 
+				if ($task['assigned_to'])  print_unescaped(" data-assign='$task[assigned_to]'");
+				if ($task['due'])          print_unescaped(" data-due='" . date("Y-m-d", $task['due']) . "'");
+				if ($task['completed'])	   print_unescaped(" data-completed='$task[completed]'");
+				if ($task['completed_by']) print_unescaped(" data-completed_by='$task[completed_by]'"); ?>>
+					<?php p( join($meta, ' · ') ); ?>
+			</p>
+		</li>
+	<?php }
+	
+	
+	
+	 /*foreach($tasks as $task) { ?>
+		<li class="task<?php p( $task['completed'] ? ' complete' : '' ); ?>" data-task_id="<?php p($task['id']); ?>">
+			
+			<input data-task_id="<?php p($task['id']); ?>" class="complete_checkbox" type="checkbox" name="complete"<?php p($task['complete'] == 100 ? " checked" : "" ); ?> />
+			
+			<span class="priority" data-priority="<?php p($task['priority']); ?>"><?php ?></span>
+			
+			<h2 class="task_summary"><?php p($task['summary']); ?></h2>
+			
+			<p class="task_description"><?php p($task['description']); ?></p>
+
+			<p class="task_meta assigned-due<?php p( ($task['assigned_to'] || $task['due']) ? '' : ' hidden' ); ?>">
+				<span class="assigned_to" data-assign="<?php p($task['assigned_to']); ?>"><?php if($task['assigned_to']) p( $task['assigned_to']); ?></span>
+				<?php if ($task['assigned_to'] && $task['due'] ) p(' · '); ?>
+				<span class="due-date" data-due="<?php if($task['due']) p(date("Y-m-d", $task['due'])); ?>"><?php if($task['due']) p( " " . date("D, M j", $task['due']) ); ?></span>
+			</p>
+			<p class="task_meta complete-meta">
+				<span class="completed_by"><?php if($task['completed_by']) p ( "Completed by " . $task['completed_by'] ); ?></span>
+				<?php if ($task['completed_by'] && $task['completed'] ) p(' · '); ?>
+				<span class="completed-date"><?php if($task['completed']) p( date("D, M j", strtotime($task['completed'] )) ); ?></span>
+			</p>
+		</li>
+	<?php } */?>
+</ul>

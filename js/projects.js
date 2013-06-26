@@ -24,24 +24,29 @@ $(document).ready(function () {
 			weekday[6]="Sat";
 		
 		var month = new Array(12);
-			month[0]="January";
-			month[1]="February";
-			month[2]="March";
-			month[3]="April";
+			month[0]="Jan";
+			month[1]="Feb";
+			month[2]="Mar";
+			month[3]="Apr";
 			month[4]="May";
-			month[5]="June";
-			month[6]="July";
-			month[7]="August";
-			month[8]="September";
-			month[9]="October";
-			month[10]="November";
-			month[11]="December";
+			month[5]="Jun";
+			month[6]="Jul";
+			month[7]="Aug";
+			month[8]="Sep";
+			month[9]="Oct";
+			month[10]="Nov";
+			month[11]="Dec";
 			
 			today = new Date();
 			today.setHours(00,00,00);
 			fortnight = new Date(today);
 			fortnight.setDate(fortnight.getDate()+14);
-			date = new Date(date);
+			if ($.type(date)=="string") { // ie, if in mysql date-time format, yyyy-mm-dd hh:ii:ss, convert to js date
+				t = date.split(/[- :]/);
+				date = new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
+			} else { // else hopefully it's a unix timestamp. damn you javascript, damn you
+				date = new Date(date);
+			}
 			if ((date > today) && (date < fortnight)) {
 				return(weekday[date.getDay()] + ", " + month[date.getMonth()] + " " + date.getDate() );
 			} else {
@@ -137,124 +142,111 @@ $(document).ready(function () {
 	
 	// Ajax add task
 	$('#content').on('click', '#new_task_button', function() {
-		$('#new_task').fadeIn("fast").draggable();
-		$('#new_summary').focus();
+		$('#new_task').draggable().fadeIn("fast");
+		$('#new_task #new_summary').focus();
 	});
-	$('#content').on("submit", '#new_task', function(event) {
-		event.preventDefault();
-		var post = $(this).serialize();
-		$.post( OC.filePath('projects', 'ajax', 'edit_task.php'), post, function(data) {
-			$('#calendar_id').val(data['calendar_id']);
-			$('#tasks').append('<tr class="task" data-task_id="' + data.task['id'] + '">' 
-				+ '<td><input data-task_id="' + data.task['id'] + '" class="complete_checkbox" type="checkbox" name="complete" /></td>'
-				+ '<td class="priority"></td>'
-				+ '<td class="task_content"><h2 class="task_summary"></h2><p class="task_description"></p></td>'
-				+ '<td class="due-date" data-due="" data-assign=""></td>'
-				+ '<td class="completed-date"></td>'
-			+ '</tr>');
-			populateTask(data.task);
-			
-			$('#new_task').hide();
-		}, "json");
-	});
-	$('#content').on('click', '#cancel_new_task', function(e) {
-		e.preventDefault();
-		$('#new_task').fadeOut("fast");
-	});
+		$('#content').on("submit", '#new_task', function(e) {
+			e.preventDefault();
+			$.post( OC.filePath('projects', 'ajax', 'edit_task.php'), $(this).serialize(), function(data) {
+				$('#calendar_id').val(data['calendar_id']);
+				NewTask = $('#task_template').clone().attr('data-task_id', data.task.id).removeClass('hidden').removeAttr('id');
+				$('#tasks').prepend(NewTask);
+				populateTask(data.task);
+				$('#new_task').hide();
+			}, "json");
+		});
+		$('#content').on('click', '#cancel_new_task', function(e) {
+			e.preventDefault();
+			$('#new_task').fadeOut("fast");
+		});
 	
 	// Ajax complete task
-	$('#content').on("change", "#tasks .complete_checkbox", function() {
-		var checked = 0;
-		if ( $(this).is(':checked') ) checked = 100;
-		var post = "id="+$(this).attr("data-task_id")+"&type=complete&checked="+checked+"&project_id="+$('#project_id').val();
-		$.post( OC.filePath('projects', 'ajax', 'edit_task.php'), post, function(data) {
-			var task = $("#tasks").find("[data-task_id='" + data.data['id'] + "']");
-			if (data.data.complete == "100") {
-				completed = new Date(data.data.completed);
-				task.find('.completed-date').html('Completed ' + formatDate(data.data.completed) + '<br /> By ' + data.data.completed_by );
-			} else {
-				task.find('.completed-date').text('');
-			}
+	$('#content').on("change", "#tasks .task_complete", function() {
+		var checked = $(this).is(':checked') ? 100 : 0;
+		$.post( OC.filePath('projects', 'ajax', 'edit_task.php'), "id="+$(this).parent().attr("data-task_id")+"&type=complete&checked="+checked+"&project_id="+$('#project_id').val(), function(data) {
+			populateTask(data.task);
 		}, "json");
 	});
 
 	// Ajax edit task
 	var task = new Array();
-	$("#content").on("click", "#tasks .task_summary", function() {
-		// get task info
-		task = [];
-		task['id'] = $(this).parent().parent().attr('data-task_id');
-		task['summary'] = $(this).text();
-		task['due'] = $(this).parent().parent().find('.due-date').attr('data-due');
-		task['assign'] = $(this).parent().parent().find('.due-date').attr('data-assign');
-		task['priority'] = $(this).parent().parent().find('.priority').attr('data-priority');
-		task['description'] = $(this).next().text();
-		
-		// populate form
-		$('#task_id').val(task['id']);
-		$('#summary').val(task['summary']);
-		$('#due').val(task['due']); 
-		$('#assign').val(task['assign']);
-		$('#priority').val(task['priority']);
-		$('#notes').val(task['description']);
-		
-		// show form
-		$('#edit_task').fadeIn("fast").draggable();
+	$("#content").on("click", "priority, .task_summary, .task_description, .task_meta", function() {
+		var t = $(this).parent();
+		$('#edit_task #task_id').val( t.attr('data-task_id') );
+		$('#edit_task #summary').val( t.find('.task_summary').text() );
+		$('#edit_task #due').val( t.find('.task_meta').attr('data-due') ); 
+		$('#edit_task #assign').val( t.find('.task_meta').attr('data-assign') );
+		$('#edit_task #priority').val( t.find('.task_priority').attr('data-priority') );
+		$('#edit_task #notes').val( t.find('.task_description').text() );
+		$('#edit_task').draggable().fadeIn("fast");
 	});
-	// save and update, on update
-	$('#content').on('click', '#update_task', function(e){
-		e.preventDefault();
-		post = $('#edit_task').serialize() + "&type=update";
-		$.post( OC.filePath('projects', 'ajax', 'edit_task.php'), post, function(data) {
-			// update task on page
-			populateTask(data.data);
-		}, "json");
-		$('#edit_task').fadeOut("fast");
-	});
-
-	// close, on cancel
-	$('#content').on('click', '#cancel_task', function(e){
-		e.preventDefault();
-		$('#edit_task').fadeOut("fast");
-	});
-	
-	// delete the task
-	$('#content').on('click', '#delete_task', function(e){
-		e.preventDefault();
-		var r = confirm("Are you sure you want to delete this task? This operation cannot be undone.");
-		if (r == true) {
-			$.post( OC.filePath('projects', 'ajax', 'edit_task.php'), "id="+ task['id'] + "&type=delete", function(data) {
-				$("#tasks").find("[data-task_id='" + data.data['id'] + "']").remove();
+		// save and update, on update
+		$('#content').on('click', '#update_task', function(e){
+			e.preventDefault();
+			$.post( OC.filePath('projects', 'ajax', 'edit_task.php'), $('#edit_task').serialize() + "&type=update", function(data) {
+				populateTask(data.task);
 			}, "json");
-		}
-		$('#edit_task').fadeOut("fast");
-	});
+			$('#edit_task').fadeOut("fast");
+		});
+		// close, on cancel
+		$('#content').on('click', '#cancel_task', function(e){
+			e.preventDefault();
+			$('#edit_task').fadeOut("fast");
+		});
+		// delete the task
+		$('#content').on('click', '#delete_task', function(e){
+			e.preventDefault();
+			//var r = confirm("Are you sure you want to delete this task? This operation cannot be undone.");
+			//if (r == true) {
+				$.post( OC.filePath('projects', 'ajax', 'edit_task.php'), "id="+ task['id'] + "&type=delete", function(data) {
+					$("#tasks").find("[data-task_id='" + data.data['id'] + "']").remove();
+				}, "json");
+			//}
+			$('#edit_task').fadeOut("fast");
+		});
 		
 	// populate the task from json data
 	function populateTask(data) {
 		var task = $("#tasks").find("[data-task_id='" + data['id'] + "']");
-		task.find(".task_summary").text(data.summary);
-		if (data.due) {
-			var due = new Date(parseInt(data.due)*1000);
-			task.find(".due-date").text("Due " + formatDate(parseInt(data.due)*1000) );
-			task.find(".due-date").attr("data-due", due.getFullYear() + "-" + ("0" + (due.getMonth()+1)).slice(-2) + "-" + ("0" + due.getDate()).slice(-2));
-		} else {
-			task.find(".due-date").text("");
-			task.find(".due-date").attr("data-due", "");
-		}
-		if (data.assigned_to) task.find(".due-date").append("<br />Assigned to " + data.assigned_to);
-		task.find(".due-date").attr("data-assign", data.assigned_to);
+		
 		var priority = parseInt(data.priority);
-		if (priority < 4 ) {
-			task.find(".priority").text('!!!').attr('data-priority', priority);
-		} else if(priority > 3 && priority < 7 ) {
-			task.find(".priority").text('!!').attr('data-priority', priority);
-		} else if (priority > 7 ) {
-			task.find(".priority").text('!').attr('data-priority', priority);
+		if ( priority < 4 ) { 
+			task.find(".task_priority").text('!!!').attr('data-priority', priority);
+		} else if( priority > 3 && priority < 7 ) {
+			task.find(".task_priority").text('!!').attr('data-priority', priority);
+		} else if ( priority > 7 ) {
+			task.find(".task_priority").text('!').attr('data-priority', priority);
 		} else {
-			task.find(".priority").text('').attr('data-priority', '');
+			task.find(".task_priority").text('').attr('data-priority', '');
 		}
-		task.find('.task_description').text(data.description);		
+		
+		task.find(".task_summary").text(data.summary);
+		
+		task.find('.task_description').text(data.description);
+
+		var due = new Date(parseInt(data.due)*1000);
+		data.assigned_to  ? task.find('.task_meta').attr("data-assign", data.assigned_to) : task.find('.task_meta').removeAttr('data-assign');
+		data.due 		  ? task.find('.task_meta').attr("data-due", due.getFullYear() + "-" + ("0" + (due.getMonth()+1)).slice(-2) + "-" + ("0" + due.getDate()).slice(-2)) : task.find('.task_meta').removeAttr('data-due');
+		data.completed_by ? task.find('.task_meta').attr("data-completed_by", data.completed_by) : task.find('.task_meta').removeAttr('data-completed_by');
+		data.completed    ? task.find('.task_meta').attr("data-completed", data.completed) : task.find('.task_meta').removeAttr('data-completed');
+
+		var meta = [];
+
+		task.removeClass('complete');
+		if (data.complete == 100) {
+			task.addClass('complete');
+			if (data.completed_by) meta.push("Completed by " + data.completed_by );
+			if (data.completed)    meta.push(formatDate(data.completed));
+		} else if (data.assigned_to || data.due) {
+			if (data.assigned_to)  meta.push(data.assigned_to);
+			if (data.due)          meta.push(formatDate(parseInt(data.due)*1000));
+		}
+		
+		if (meta.length > 0) {
+			task.find('.task_meta').removeClass('hidden').text(meta.join(' · '));
+		} else {
+			task.find('.task_meta').addClass('hidden');
+		}
 	}
 
 	/*

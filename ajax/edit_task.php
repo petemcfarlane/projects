@@ -12,7 +12,7 @@ if ( isset($_POST['type']) && $_POST['type'] == 'complete') {
 	if ( OC_Calendar_Object::edit($_POST['id'], $vcalendar->serialize()) ) {
 		//$updateAction = OC_Projects_App::updateAction( $_POST['project_id'], $action = $_POST['checked'] ? "task_completed" : "task_uncompleted", "task", $_POST['id'] );
 		$task_info = OC_Projects_App::arrayForJSON($_POST['id'], $vtodo, OC_Calendar_App::getTimezone());
-		OCP\JSON::success(array('data' => $task_info));
+		OCP\JSON::success(array("task"=>$task_info));
 	}
 	exit;
 }
@@ -53,7 +53,7 @@ if ( isset($_POST['type']) && $_POST['type'] == 'update') {
 	}
 	if ( OC_Calendar_Object::edit($_POST['id'], $vcalendar->serialize()) ) {
 		$task_info = OC_Projects_App::arrayForJSON($_POST['id'], $vtodo, OC_Calendar_App::getTimezone());
-		OCP\JSON::success(array('data' => $task_info));
+		OCP\JSON::success( array("task"=>$task_info) );
 	}
 	exit;
 }

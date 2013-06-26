@@ -97,17 +97,20 @@ p.loading_details {opacity:.5;}
  */
 
 #new_task_button {margin: 1.5em auto;display: block;}
-#tasks {white-space:normal;}
-#tasks td {vertical-align: top; padding: 1em;}
-.priority {color: #CE0101; font-weight: bold; margin:0.5em;}
-input[type="checkbox"].complete_checkbox {margin-top: 3px;}
-.task_summary {font-weight: bold;}
-.task_description,
-.due-date,
-.completed-date {color: #666;}
-#edit_task, #new_task {min-width:260px;border: 1px solid #F2F2F2;border-radius: 4px;position: fixed;left: 40%;top: 20%;background: #FFF;padding: 1em;box-shadow: 0 3px 15px #818181;z-index:200;}
+.task {padding: 0.4em 0;}
+.task.complete, .task.complete .task_description {color: #999;}
+.task.complete .task_summary {text-decoration: line-through;}
+.task_priority {color: #CE0101; font-weight: bold;}
+.task_summary {display:inline;}
+.task_description {display:inline;color:#555}
+.task_meta {display:inline;color: #666;background: #EEE;border-radius: 12px;padding: 0.1em 0.9em;font-size: 0.85em;}
+.task.complete .assigned-due {display: none;}
+.task .complete-meta {display: none;}
+.task.complete .complete-meta {display: inline;}
+.task_meta.hidden {display:none;}
+#edit_task, #new_task {min-width:260px;border: 1px solid #F2F2F2;border-radius: 4px;position: fixed;left: 40%;top: 20%;background: #FFF;padding: 0 1em;box-shadow: 0 3px 15px #818181;z-index:200;}
 #edit_task p, #new_task p {margin: 1em 0;}
-#summary, #new_summary {width: 100%;padding: 0;margin: 0;border: none;background: #FFF;box-shadow: none;font-weight: bold;font-size: 1.2em;}
+#summary, #new_summary {border-radius:0;color:#000;width: 100%;padding: 0;margin: 0;border: none;background: #FFF;box-shadow: none;font-weight: bold;font-size: 1.2em;}
 #due, #new_due {font-family: "Helvetica Neue",Helvetica,Arial,FreeSans,sans-serif;text-align: right;border: none;padding: 0;margin: 0;float: right;outline: none;}
 #assign, #new_assign {float:right;border: none;margin: 0;padding: 0;text-align: right;background: #FFF;box-shadow: none;}
 #priority, #new_priority {float: right;text-align: right;background: #FFF;border: none;padding: 0;margin: 0;}
