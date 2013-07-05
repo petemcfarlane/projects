@@ -121,6 +121,7 @@ $(document).ready(function () {
 	// Ajax edit details
 	$('#content').on("change", "#edit_details input, #edit_details textarea, #edit_details select", function() {
 		var input = $(this)
+		
 		$.ajax({
 			url: OC.filePath('projects', 'ajax', 'edit_project.php'), 
 			data: input.serialize()+'&project_id='+($('#project_id').val()),
@@ -130,6 +131,7 @@ $(document).ready(function () {
 				input.parent().addClass('loading_details');
 			},
 			success: function(data) {
+				console.log(data);
 				input.parent().removeClass('loading_details');
 			}
 		});
@@ -170,7 +172,7 @@ $(document).ready(function () {
 	});
 
 	// Ajax edit task
-	var task = new Array();
+/*	var task = new Array();
 	$("#content").on("click", "priority, .task_summary, .task_description, .task_meta", function() {
 		var t = $(this).parent();
 		$('#edit_task #task_id').val( t.attr('data-task_id') );
@@ -205,6 +207,7 @@ $(document).ready(function () {
 			//}
 			$('#edit_task').fadeOut("fast");
 		});
+*/
 		
 	// populate the task from json data
 	function populateTask(data) {

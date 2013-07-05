@@ -30,10 +30,9 @@ p {margin: 1em 0;}
 .breadcrumb {padding: 8px 15px;list-style: none;background-color: #F5F5F5;}
 .breadcrumb li {display: inline-block;text-shadow: 0 1px 0 #FFF;}
 .breadcrumb li .divider {padding: 0 5px;color: #CCC;}
-.submenu {display:none;}
+.breadcrumb li:last-child {cursor: Default;}
+.breadcrumb li:last-child a {font-weight: bold;cursor:default;}
 #projects_nav li:hover .submenu {display:block;}
-#projects_nav li .submenu {position: absolute;background: #F5F5F5;}
-#projects_nav li .submenu li {border:none;display:block;float:none;}
 
 /*
  * Main
@@ -51,7 +50,7 @@ p {margin: 1em 0;}
 .event_time {font-size: 0.9em;color: #999;display:inline-block;min-width:100px;}
 
 /*
- * Projects
+ * Project list
  */
 
 .project_list {margin: 1em 0;}
@@ -82,6 +81,16 @@ p {margin: 1em 0;}
 .thumbnail_60 {border-radius: 50%;max-width: 60px;}
 
 /*
+ * Project
+ */
+
+.project_preview {display: block;border: 1px solid #EEE;border-radius: 0.5em;padding: 1em;margin: 1em;box-shadow: 0 5px 5px -5px #CCC;}
+.project_preview:hover {text-decoration: none;}
+.project_preview h2 {text-align: center;}
+.project_preview .project_action img {display: none;}
+.project_preview .project_action {margin: 0;}
+
+/*
  * Details
  */
 
@@ -99,6 +108,7 @@ p.loading_details {opacity:.5;}
 
 #new_task_button {margin: 1.5em auto;display: block;}
 .task {padding: 0.4em 0;}
+.task a {text-decoration: none;}
 .task.complete, .task.complete .task_description {color: #999;}
 .task.complete .task_summary {text-decoration: line-through;}
 .task_priority {color: #CE0101; font-weight: bold;}

@@ -178,6 +178,22 @@ Class OC_Projects_App {
 	}*/
 
 	/**
+	 * @brief converts priority number to exclamation marks
+	 * @param number $priority
+	 * @return string !!!, !!, ! or ''
+	 */
+	public static function getPriority($priority) {
+		if ($priority > 6 && $priority <= 9) { // low
+			return('!');
+		} elseif ($priority > 3 && $priority < 7) { // medium
+			return('!!');
+		} elseif ($priority >= 1 && $priority < 4) { // high
+			return('!!!');
+		} 
+	}
+	
+	
+	/**
 	 * @brief returns a task as an array
 	 * @param number
 	 * @param number

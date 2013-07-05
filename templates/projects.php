@@ -2,6 +2,7 @@
 $uid		= $_['uid'];
 $project_id = $_['project_id'];
 $view		= $_['view'];
+$item		= $_['item'];
 
 // if single project selected
 if ($project_id) {
@@ -20,8 +21,9 @@ $projects = OC_Projects_App::getProjects($uid);
 <header>
 	<ul id="projects_nav" class="breadcrumb">
 		<li><a href="<?php p(OCP\Util::linkTo( 'projects', 'index.php' )); ?>">All Projects</a></li>
-		<?php if ($project) { ?><li><span class="divider">/</span> <a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] ); ?>"><?php p( $project['name']); ?></a></li><?php } ?>
-		<?php if ($view && $view != 'project') { ?><li><span class="divider">/</span> <a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/" . $view ); ?>"><?php p( ucfirst($view) ); ?></a></li><?php } ?>
+		<?php if ($project) { ?><li><span class="divider">/</span> <a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/$project[id]" ); ?>"><?php p( $project['name']); ?></a></li><?php } ?>
+		<?php if ($view && $view != 'project') { ?><li><span class="divider">/</span> <a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/$project[id]/$view" ); ?>"><?php p( ucfirst($view) ); ?></a></li><?php } ?>
+		<?php if ($item) { ?><li><span class="divider">/</span><a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/$project[id]/$view/$item" ); ?>"><?php p($item); ?></a></li><?php } ?>
 	</ul>
 </header>
 
@@ -29,7 +31,9 @@ $projects = OC_Projects_App::getProjects($uid);
 	<?php switch ( $view ) {
 	case 'history' : include_once('part.history.php'); break;
 	case "details" : include_once("part.details.php"); break;
-	case "tasks" : include_once("part.tasks.php"); break;
+	case "tasks" : 
+		$item ? include_once("part.task.php") :	include_once("part.tasks.php"); 
+		break;
 	case "notes" : include_once("part.notes.php"); break;
 	case "files" : include_once("part.files.php"); break;
 	case "meetings" : include_once("part.meetings.php"); break;

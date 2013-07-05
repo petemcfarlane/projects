@@ -12,3 +12,9 @@ $this->create('project_view', 'id/{project_id}/{view}')->get()->action(
         require __DIR__ . '/../index.php';
     }
 );
+
+$this->create('item_view', 'id/{project_id}/{view}/{item}')->get()->action(
+	function($params) {
+		require __DIR__ . '/../index.php';
+	}
+);
