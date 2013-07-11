@@ -18,3 +18,15 @@ $this->create('item_view', 'id/{project_id}/{view}/{item}')->get()->action(
 		require __DIR__ . '/../index.php';
 	}
 );
+
+$this->create('new_project')->post()->action(
+	function($params) {
+		require __DIR__ . '/../create.php';
+	}
+); 
+
+$this->create('new_item', 'id/{project_id}/{view}')->post()->action(
+	function($params) {
+		require __DIR__ . '/../create.php';
+	}
+);

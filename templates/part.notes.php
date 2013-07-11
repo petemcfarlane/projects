@@ -12,13 +12,13 @@
 	</p>
 </form>
 
-<ul>
+<ul class="notes-list">
 	<li id="note_template" class="note">
 		<div class="content"></div>
 		<footer>
 			<span class="meta"></span>
-			<button class="edit_button" data-note_id=""><i class="icon-pencil"></i> Edit</button>
-			<button class="trash_button" data-note_id=""><i class="icon-trash"></i> Trash</button>
+			<button class="edit_button"><i class="icon-pencil"></i> Edit</button>
+			<button class="trash_button"><i class="icon-trash"></i> Trash</button>
 		</footer>
 	</li>
 
@@ -29,12 +29,12 @@
 	
 		// List notes 
 		foreach ($notes as $note) { ?>
-			<li id="note_id_<?php p($note['note_id']); ?>" class="note">
+			<li id="note_id_<?php p($note['id']); ?>" class="note">
 				<div class="content"><?php print_unescaped($note['note']); ?></div>
 				<footer>
 					<span class="meta"><?php p($note['parent_id'] ? 'Updated by ' : 'Created by ' ); p($note['creator']); p(' on '); p( date("jS M, 'y \t H:i", strtotime($note['atime'])) ); ?></span>
-					<button class="edit_button" data-note_id="<?php p($note['note_id']);?>"><i class="icon-pencil"></i> Edit</button>
-					<button class="trash_button" data-note_id="<?php p($note['note_id']);?>"><i class="icon-trash"></i> Trash</button>
+					<button class="edit_button" data-note_id="<?php p($note['id']);?>"><i class="icon-pencil"></i> Edit</button>
+					<button class="trash_button" data-note_id="<?php p($note['id']);?>"><i class="icon-trash"></i> Trash</button>
 				</footer>
 			</li>
 	
@@ -47,7 +47,7 @@
 <ul id="trash_notes_list" class="hidden">
 	<li id="trash_template" class="note trash">
 		<div class="content"></div>
-		<footer><span class="meta"></span><button class="restore" data-note_id="">Restore</button><button class="delete_permenantly" data-note_id="">Delete permenantly</button></footer>
+		<footer><span class="meta"></span><button class="restore">Restore</button><button class="delete_permenantly">Delete permenantly</button></footer>
 	</li>
 	
 	<?php // Load all 'trashed' notes 
@@ -57,12 +57,12 @@
 	
 	// List notes 
 	foreach ($trashed_notes as $note) { ?>
-		<li id="note_id_<?php p($note['note_id']); ?>" class="note trash">
+		<li id="note_id_<?php p($note['id']); ?>" class="note trash">
 			<div class="content"><?php print_unescaped($note['note']); ?></div>
 			<footer>
 				<span class="meta"><?php p( 'Trashed by ' ); p($note['creator']); p(' on '); p( date("jS M, 'y \t H:i", strtotime($note['atime'])) ); ?></span>
-				<button class="restore" data-note_id="<?php p($note['note_id']);?>">Restore</button>
-				<button class="delete_permenantly" data-note_id="<?php p($note['note_id']);?>">Delete permenantly</button>
+				<button class="restore" data-note_id="<?php p($note['id']);?>">Restore</button>
+				<button class="delete_permenantly" data-note_id="<?php p($note['id']);?>">Delete permenantly</button>
 			</footer>
 		</li>
 	<?php } ?>

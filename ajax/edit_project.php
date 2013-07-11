@@ -61,7 +61,10 @@ if ( isset ( $_POST['new_project'] ) ) {
 	exit;
 	
 
-} elseif ( isset($_POST['project_id']) && $_POST['project_id'] !== '' ) {
+} /*
+ * OLD - see edit_details.php
+ * --------------------------------
+ * elseif ( isset($_POST['project_id']) && $_POST['project_id'] !== '' ) {
 // Update Project
 	$data['project_id'] = $_POST['project_id'];
 	foreach($_POST as $key => $value) {
@@ -72,4 +75,4 @@ if ( isset ( $_POST['new_project'] ) ) {
 	}
 	$response = OC_Projects_App::updateProject($data, "edited", "$data[update_key] => $data[update_value]");
 	OCP\JSON::success(array("restored_project" => $response));
-}
+}*/

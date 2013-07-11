@@ -27,38 +27,10 @@
 			<field>
 				<name>description</name>
 				<type>text</type>
-				<notnull>true</notnull>
+				<notnull>false</notnull>
 				<length>250</length>
 			</field>
 			
-			<field>
-				<name>project_type</name>
-				<type>text</type>
-				<length>64</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>platform</name>
-				<type>text</type>
-				<length>64</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>technical_authority</name>
-				<type>text</type>
-				<length>64</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>commercial_authority</name>
-				<type>text</type>
-				<length>64</length>
-				<notnull>false</notnull>
-			</field>
-
 			<field>
 				<name>creator</name>
 				<type>text</type>
@@ -73,163 +45,6 @@
 			</field>
 			
 			<field>
-				<name>technical_aims</name>
-				<type>text</type>
-				<length>150</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>present_quotation</name>
-				<type>text</type>
-				<length>64</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>negotiate_order</name>
-				<type>text</type>
-				<length>64</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>requirements</name>
-				<type>text</type>
-				<length>250</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>commercial_aims</name>
-				<type>text</type>
-				<length>150</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>notes</name>
-				<type>clob</type>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>purchase_decision</name>
-				<type>date</type>
-				<default>0000-00-00</default>
-			</field>
-
-			<field>
-				<name>evaluation_sent</name>
-				<type>date</type>
-				<default>0000-00-00</default>
-			</field>
-
-			<field>
-				<name>optimisation_done</name>
-				<type>date</type>
-				<default>0000-00-00</default>
-			</field>
-
-			<field>
-				<name>manufacture</name>
-				<type>date</type>
-				<default>0000-00-00</default>
-			</field>
-
-			<field>
-				<name>release_date</name>
-				<type>date</type>
-				<default>0000-00-00</default>
-			</field>
-
-			<field>
-				<name>minimum</name>
-				<type>integer</type>
-				<length>50</length>
-				<notnull>true</notnull>
-			</field>
-
-			<field>
-				<name>ramp1</name>
-				<type>integer</type>
-				<length>50</length>
-				<notnull>true</notnull>
-			</field>
-
-			<field>
-				<name>ramp2</name>
-				<type>integer</type>
-				<length>50</length>
-				<notnull>true</notnull>
-			</field>
-
-			<field>
-				<name>ramp3</name>
-				<type>integer</type>
-				<length>50</length>
-				<notnull>true</notnull>
-			</field>
-
-			<field>
-				<name>territories</name>
-				<type>text</type>
-				<length>150</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>retailers</name>
-				<type>text</type>
-				<length>150</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>bom</name>
-				<type>text</type>
-				<length>50</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>rrp</name>
-				<type>text</type>
-				<length>50</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>license_fee</name>
-				<type>text</type>
-				<length>50</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>budgeted</name>
-				<type>integer</type>
-				<length>1</length>
-				<notnull>true</notnull>
-				<default>0</default>
-			</field>
-
-			<field>
-				<name>odm_oem</name>
-				<type>text</type>
-				<length>150</length>
-				<notnull>false</notnull>
-			</field>
-
-			<field>
-				<name>status</name>
-				<type>integer</type>
-				<length>1</length>
-				<notnull>true</notnull>
-				<default>1</default>
-			</field>
-
-			<field>
 				<name>calendar_id</name>
 				<type>integer</type>
 				<length>4</length>
@@ -243,6 +58,48 @@
 				<notnull>false</notnull>
 			</field>
 
+			<field>
+				<name>status</name>
+				<type>integer</type>
+				<length>1</length>
+				<notnull>true</notnull>
+				<default>1</default>
+			</field>
+			
+		</declaration>
+	</table>
+	
+	<table>
+		<name>*dbprefix*projects_meta</name>
+		<declaration>
+			<field>
+				<name>id</name>
+				<type>integer</type>
+				<notnull>true</notnull>
+				<autoincrement>1</autoincrement>
+				<length>4</length>
+			</field>
+			
+			<field>
+				<name>project_id</name>
+				<type>integer</type>
+				<notnull>true</notnull>
+				<length>4</length>
+			</field>
+			
+			<field>
+				<name>meta_key</name>
+				<type>text</type>
+				<notnull>false</notnull>
+				<length>100</length>
+			</field>
+			
+			<field>
+				<name>meta_value</name>
+				<type>text</type>
+				<notnull>false</notnull>
+				<length>250</length>
+			</field>
 		</declaration>
 	</table>
 	
@@ -314,10 +171,9 @@
 		<declaration>
 			
 			<field>
-				<name>note_id</name>
+				<name>id</name>
 				<type>integer</type>
 				<notnull>true</notnull>
-				<default>0</default>
 				<autoincrement>1</autoincrement>
 				<length>4</length>
 			</field>
@@ -326,7 +182,6 @@
 				<name>project_id</name>
 				<type>integer</type>
 				<notnull>true</notnull>
-				<default>0</default>
 				<length>4</length>
 			</field>
 			
@@ -334,7 +189,6 @@
 				<name>parent_id</name>
 				<type>integer</type>
 				<notnull>false</notnull>
-				<default>0</default>
 				<length>4</length>
 			</field>
 			
@@ -367,16 +221,14 @@
 
 		</declaration>
 	</table>
-
+	
 	<table>
-		<name>*dbprefix*projects_meetings</name>
+		<name>*dbprefix*projects_history</name>
 		<declaration>
-			
 			<field>
 				<name>id</name>
 				<type>integer</type>
 				<notnull>true</notnull>
-				<default>0</default>
 				<autoincrement>1</autoincrement>
 				<length>4</length>
 			</field>
@@ -384,57 +236,64 @@
 			<field>
 				<name>project_id</name>
 				<type>integer</type>
+				<length>5</length>
 				<notnull>true</notnull>
-				<default>0</default>
-				<length>4</length>
 			</field>
 			
 			<field>
-				<name>attended_by</name>
+				<name>uid</name>
 				<type>text</type>
+				<length>64</length>
 				<notnull>true</notnull>
-				<length>150</length>
 			</field>
-
+			
 			<field>
-				<name>location</name>
+				<name>table</name>
 				<type>text</type>
+				<length>64</length>
 				<notnull>true</notnull>
-				<length>128</length>
 			</field>
-
+			
 			<field>
-				<name>date</name>
+				<name>column</name>
+				<type>text</type>
+				<length>64</length>
+				<notnull>true</notnull>
+			</field>
+			
+			<field>
+				<name>row</name>
+				<type>text</type>
+				<length>64</length>
+				<notnull>true</notnull>
+			</field>
+			
+			<field>
+				<name>value</name>
+				<type>clob</type>
+			</field>
+			
+			<field>
+				<name>undo_id</name>
+				<type>integer</type>
+				<length>5</length>
+				<notnull>false</notnull>
+			</field>
+			
+			<field>
+				<name>redo_id</name>
+				<type>integer</type>
+				<length>5</length>
+				<notnull>false</notnull>
+			</field>
+			
+			<field>
+				<name>created_at</name>
 				<type>timestamp</type>
 				<notnull>true</notnull>
 				<default>0000-00-00 00:00:00</default>
 			</field>
-
-			<field>
-				<name>discussion</name>
-				<type>clob</type>
-				<notnull>true</notnull>
-			</field>
-
-			<field>
-				<name>convince</name>
-				<type>text</type>
-				<notnull>true</notnull>
-				<length>150</length>
-			</field>
-
-			<field>
-				<name>tasks</name>
-				<type>clob</type>
-				<notnull>true</notnull>
-			</field>
-
-			<field>
-				<name>notes</name>
-				<type>clob</type>
-				<notnull>true</notnull>
-			</field>
-
+			
 		</declaration>
 	</table>
 

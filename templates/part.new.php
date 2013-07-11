@@ -17,19 +17,7 @@ OCP\JSON::callCheck();
 		</p>
 		<p>Select users to collaberate - you can change this later, too.</p>
 	
-		<?php /*<div class="invitees">			
-			<div class="person invitee blank">
-				<div class="icon"></div><input name="users[]" type="text" autocomplete="off" /><a class="remove"></a><ul class="suggestions"></ul>
-			</div>
-			<div class="person invitee blank">
-				<div class="icon"></div><input name="users[]" type="text" autocomplete="off" /><a class="remove"></a><ul class="suggestions"></ul>
-			</div>
-			<div class="person invitee blank">
-				<div class="icon"></div><input name="users[]" type="text" autocomplete="off" /><a class="remove"></a><ul class="suggestions"></ul>
-			</div>
-		</div><!-- end of .invitees --> */ 
-		
-		// get all users (mark if creator)
+		<?php // get all users (mark if creator)
 		$uids = OC_User::getUsers();
 		$users = array();
 			foreach($uids as $uid) {
@@ -41,7 +29,7 @@ OCP\JSON::callCheck();
 		<ul id="users">
 			<?php foreach ($users as $user => $u) { ?>
 				<li<?php print isset($u['creator']) ? " class='checked'": ""; ?>><label>
-					<img class="thumbnail_60" src="<?php print( OCP\Util::linkTo( 'user_photo', 'index.php' ) . "/photo/$user/60" ); ?>" />
+					<img class="thumbnail_60" src="<?php print( OCP\Util::linkTo( 'user_photo', 'index.php' ) . "/photo/$user/60" ); ?>" width="60" height="60" />
 					<?php print $u['name']; ?>
 					<input type="checkbox" name="users[]" value="<?php print $user; ?>" <?php print isset($u['creator']) ? "checked disabled": ""; ?>/>
 					<?php //print_unescaped(isset($u['creator']) ? "<em style='font-weight:normal;'>(creator)</em>" : "" ); ?>

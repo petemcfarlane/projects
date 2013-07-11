@@ -41,11 +41,11 @@ elseif ( isset ( $_POST['restore_note_id'] ) )
 
 elseif ( isset ($_POST['project_id'] ) ) 
  {
-		// create new note
+	// create new note
 	$note = OC_Projects_App::newNote($_POST['project_id'], $_POST['note']);
 	// return note_id 
 	OCP\JSON::success(array('note' => $note));
-		exit;
+	exit;
  }
 
 

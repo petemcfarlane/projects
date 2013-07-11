@@ -35,3 +35,7 @@
 		<li><a class='restore_archived_project' data-project_id="<?php p($project['id']); ?>"><h2><?php p($project['name']); ?></h2>Restore</a></li>
 	<?php } ?>
 </ul>
+
+<form method="post" action="projects">
+	<input type="submit" name="test" value="Val" />
+</form>

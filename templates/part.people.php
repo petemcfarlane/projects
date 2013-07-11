@@ -22,7 +22,7 @@ $users = array();
 <ul id="people" data-project_id="<?php p($project['id']); ?>">
 	<?php foreach ($users as $user => $u) { ?>
 		<li<?php print ( isset($u['creator']) || isset($u['current_user']) ) ? " class='checked'": ""; ?> data-uid="<?php print $user; ?>"><label>
-			<img class="thumbnail_60" src="<?php print( OCP\Util::linkTo( 'user_photo', 'index.php' ) . "/photo/$user/60" ); ?>" />
+			<img class="thumbnail_60" src="<?php print( OCP\Util::linkTo( 'user_photo', 'index.php' ) . "/photo/$user/60" ); ?>" width="60" height="60" />
 			<?php print $u['name']; ?>
 			<input type="checkbox" name="users[]" value="<?php print $user; ?>" <?php print isset($u['current_user']) ? 'checked' : ''; ?><?php print isset($u['creator']) ? " disabled": ""; ?>/>
 		</label></li>

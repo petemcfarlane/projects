@@ -73,6 +73,33 @@ Class OC_Projects_App {
 	}
 	
 	/**
+	 * @brief Record the previous state of 'table'.'column' = value
+	 * @param array $args array(project_id, table, column_key, column_value, uid, undo_id, redo_id)
+	 */
+	private static function add_undo($args) {
+		$project_id = $args["project_id"];
+		$table = $args["table"];
+		$where_key = $args["where_key"];
+		$where_value = $args["where_value"];
+		$column_value = $args["column_value"];
+		$value = $args["value"];
+		//$uid = $args["uid"];
+		//$undo_id = $args["undo_id"];
+		//$redo_id = $args["redo_id"];
+		//$created_at = date("Y-m-d H:i:s");
+
+		// Find existing value of 'table'_%_'summary' for project
+		$query = OCP\DB::prepare("SELECT $column_value FROM $table WHERE project_id = ? AND $where_key = '$where_value'");
+		$result = $query->execute( array($project_id) );
+		$result = $result->fetchRow();
+		
+		// save in history
+		
+		// return ok
+		return $result;
+	}
+	
+	/**
 	 * @brief Update a project
 	 * @param array $data array(project_id, update_key, update_value)
 	 * @param string $action default="edited"
@@ -82,12 +109,58 @@ Class OC_Projects_App {
 	public static function updateProject($data, $action="edited", $excerpt=NULL) {
 		$project_id = $data['project_id'];
 		$update_key = mysql_real_escape_string($data['update_key']);
-		$update_value = $data['update_value'];
+		$update_value = mysql_real_escape_string($data['update_value']);
+		
 		$updateQuery = OCP\DB::prepare("UPDATE *PREFIX*projects SET $update_key = ? WHERE id = ?");
 		$updateQuery->execute ( array ( $update_value, $project_id ) );
+		
 		self::addAction( $project_id, $action, 'project', $project_id, $excerpt);
-		return array("project_id"=>$project_id, "update"=>$update_key, "value"=>$update_value);
+		return array("project_id"=>$project_id, $update_key => $update_value);
 	}
+	
+	
+	/**
+	 * @brief Update project meta
+	 * @param array $data array(project_id, update_key, update_value)
+	 * @param string $action default="edited"
+	 * @param string $excerpt default=NULL
+	 * @return string
+	 */
+	public static function updateProjectMeta($data, $action="edited", $excerpt=NULL) {
+		$project_id = $data['project_id'];
+		$update_key = mysql_real_escape_string($data['update_key']);
+		$update_value = mysql_real_escape_string($data['update_value']);
+		
+		// does meta exist?
+			$query = OCP\DB::prepare("SELECT * FROM *PREFIX*projects_meta WHERE project_id = ? AND meta_key = ?");
+			$result = $query->execute( array ( $project_id, $update_key ) );
+			$result = $result->fetchRow();
+			
+			if ($result) {
+				//update
+				if ( empty($update_value) ) {
+					$query = OCP\DB::prepare("DELETE FROM *PREFIX*projects_meta WHERE project_id = ? AND meta_key = ?");
+					$result = $query->execute( array ( $project_id, $update_key) );
+					self::addAction( $project_id, "unset", "project", $project_id, $update_key);
+				} else {
+					$query = OCP\DB::prepare("UPDATE *PREFIX*projects_meta SET meta_value = ? WHERE project_id = ? AND meta_key = ?");
+					$result = $query->execute( array ( $update_value, $project_id, $update_key ) );
+					self::addAction( $project_id, $action, 'project', $project_id, $excerpt);
+				}
+			} else {
+				//create
+				$query = OCP\DB::prepare("INSERT INTO *PREFIX*projects_meta (project_id, meta_key, meta_value) VALUES (?, ?, ?) ");
+				$query->execute( array ($project_id, $update_key, $update_value ));
+				self::addAction( $project_id, $action, 'project', $project_id, $excerpt);
+			}
+		//$updateQuery = OCP\DB::prepare("UPDATE *PREFIX*projects SET $update_key = ? WHERE id = ?");
+		//$updateQuery->execute ( array ( $update_value, $project_id ) );
+		
+		//self::addAction( $project_id, $action, 'project', $project_id, $excerpt);
+		return array("project_id"=>$project_id, $update_key => $update_value);
+	}
+	
+	
 
 	/**
 	 * @brief Check if the user is participant in a project
@@ -146,7 +219,7 @@ Class OC_Projects_App {
 			default : $return .= " " .$action['uaction'] . " "; break;
 		}
 		switch ($action['target_type']) {
-			case ("project") : $return .= " the project: <em class='excerpt'>" . $action['excerpt'] . "</em>"; break;
+			case ("project") : $return .= " the project <em class='excerpt'>" . $action['excerpt'] . "</em>"; break;
 			case ("person") : $return .= " ".OC_User::getDisplayName($action['target_id']); break;
 			case ("note") : $return .= " a note: <em class='excerpt'>" . $action['excerpt'] . "</em>"; break;
 		}
@@ -345,7 +418,7 @@ Class OC_Projects_App {
 		$query->execute( array ( $project_id, NULL, $creator, 'current', $atime, $note ) );
 		$note_id = OC_DB::insertid();
 		self::addAction( $project_id, "created", "note", $note_id, substr($note, 0, 100) ) ;
-		return(array("note_id" => $note_id, "project_id" => $project_id, "creator" => $creator, "status" => "current", "atime" => $atime, "note" => $note));
+		return(array("id" => $note_id, "project_id" => $project_id, "creator" => $creator, "status" => "current", "atime" => $atime, "note" => $note));
 	}
 
 	/**
@@ -354,10 +427,10 @@ Class OC_Projects_App {
 	 * @return array 
 	 */
 	public static function trashNote($trash_note_id) {
-		$updateNote = OCP\DB::prepare("UPDATE *PREFIX*projects_notes SET status = 'old' WHERE note_id = ?");
+		$updateNote = OCP\DB::prepare("UPDATE *PREFIX*projects_notes SET status = 'old' WHERE id = ?");
 		$updateNote->execute ( array ( $trash_note_id ) );
 		
-		$query = OCP\DB::prepare( 'SELECT project_id, note FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
+		$query = OCP\DB::prepare( 'SELECT project_id, note FROM `*PREFIX*projects_notes` WHERE `id` = ?' );
 		$result = $query->execute(array($trash_note_id));
 		$notedata = $result->fetchRow();
 		$project_id = $notedata['project_id'];
@@ -369,7 +442,7 @@ Class OC_Projects_App {
 		$query->execute( array ( $project_id, $trash_note_id, $creator, $atime, $note ) );
 		$note_id = OC_DB::insertid();
 		self::addAction( $project_id, "trashed", "note", $note_id, substr($note, 0, 100) );
-		return(array("note_id" => $note_id, "project_id" => $project_id, "creator" => $creator, "status" => "trash", "atime" => $atime, "note" => $note));
+		return(array("id" => $note_id, "project_id" => $project_id, "creator" => $creator, "status" => "trash", "atime" => $atime, "note" => $note));
 	}
 
 	/**
@@ -379,10 +452,10 @@ Class OC_Projects_App {
 	 * @return array (new note);
 	 */
 	public static function editNote($edit_note_id, $note) {
-		$updateNote = OCP\DB::prepare("UPDATE *PREFIX*projects_notes SET status = 'old' WHERE note_id = ?");
+		$updateNote = OCP\DB::prepare("UPDATE *PREFIX*projects_notes SET status = 'old' WHERE id = ?");
 		$updateNote->execute( array ( $edit_note_id ) );
 		
-		$query = OCP\DB::prepare( 'SELECT project_id FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
+		$query = OCP\DB::prepare( 'SELECT project_id FROM `*PREFIX*projects_notes` WHERE `id` = ?' );
 		$result = $query->execute(array($edit_note_id));
 		$notedata = $result->fetchRow();
 		$project_id = $notedata['project_id'];
@@ -393,7 +466,7 @@ Class OC_Projects_App {
 		$query->execute( array ( $project_id, $edit_note_id, $creator, $atime, $note ) );
 		$note_id = OC_DB::insertid();
 		self::addAction( $project_id, "edited", "note", $note_id, substr($note, 0, 100) );
-		return(array("note_id" => $note_id, "project_id" => $project_id, "creator" => $creator, "status" => "current", "atime" => $atime, "note" => $note ));
+		return(array("id" => $note_id, "project_id" => $project_id, "creator" => $creator, "status" => "current", "atime" => $atime, "note" => $note ));
 	}
 
 	/**
@@ -402,10 +475,10 @@ Class OC_Projects_App {
 	 * @return array 
 	 */
 	public static function restoreNote($restore_note_id) {
-		$updateNote = OCP\DB::prepare("UPDATE *PREFIX*projects_notes SET status = 'current' WHERE note_id = ?");
+		$updateNote = OCP\DB::prepare("UPDATE *PREFIX*projects_notes SET status = 'current' WHERE id = ?");
 		$updateNote->execute( array ( $restore_note_id ) );
 		
-		$query = OCP\DB::prepare( 'SELECT project_id, creator, atime, note FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
+		$query = OCP\DB::prepare( 'SELECT project_id, creator, atime, note FROM `*PREFIX*projects_notes` WHERE `id` = ?' );
 		$result = $query->execute(array($restore_note_id));
 		$notedata = $result->fetchRow();
 		$project_id = $notedata['project_id'];
@@ -414,7 +487,7 @@ Class OC_Projects_App {
 		$note = $notedata['note'];
 		
 		self::addAction( $project_id, "restored", "note", $restore_note_id, substr($note, 0, 100) );
-		return(array("note_id" => $restore_note_id, "project_id" => $project_id, "creator" => $creator, "status" => "current", "atime" => $atime, "note" => $note ));
+		return(array("id" => $restore_note_id, "project_id" => $project_id, "creator" => $creator, "status" => "current", "atime" => $atime, "note" => $note ));
 	}
 
 	/**
@@ -423,7 +496,7 @@ Class OC_Projects_App {
 	 * @return array notes deleted
 	 */
 	public static function deleteNotePermenantly($delete_note_permenantly) {
-		$query = OCP\DB::prepare( 'SELECT project_id FROM `*PREFIX*projects_notes` WHERE `note_id` = ?' );
+		$query = OCP\DB::prepare( 'SELECT project_id FROM *PREFIX*projects_notes WHERE id = ?' );
 		$result = $query->execute(array($delete_note_permenantly));
 		$notedata = $result->fetchRow();
 		$project_id = $notedata['project_id'];
@@ -432,10 +505,10 @@ Class OC_Projects_App {
 
 		// get parent notes
 		while ( $delete_note_permenantly ) {
-			$query = OCP\DB::prepare( 'SELECT parent_id FROM *PREFIX*projects_notes WHERE note_id = ?' );
+			$query = OCP\DB::prepare( 'SELECT parent_id FROM *PREFIX*projects_notes WHERE id = ?' );
 			$result = $query->execute( array ( $delete_note_permenantly ) );
 			$notedata = $result->fetchRow();
-			$delete_notes = OCP\DB::prepare("DELETE FROM *PREFIX*projects_notes WHERE note_id = ?");
+			$delete_notes = OCP\DB::prepare("DELETE FROM *PREFIX*projects_notes WHERE id = ?");
 			$delete_notes->execute( array ( $delete_note_permenantly ) );
 			if ($notedata['parent_id']) {
 				$delete_note_permenantly = $notedata['parent_id'];
@@ -444,7 +517,7 @@ Class OC_Projects_App {
 				$delete_note_permenantly = false;
 			}
 		}
-		return (array ('note_id' => $to_delete ));
+		return (array ('id' => $to_delete ));
 	}
 	
 	/*

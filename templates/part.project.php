@@ -11,14 +11,22 @@
 	?>
 </a>
 
-<a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/details" ); ?>">
+<a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/details" ); ?>" class="project_preview">
 	<h2>Details</h2>
 </a>
 
-<a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/tasks" ); ?>">Tasks</a>
+<a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/tasks" ); ?>" class="project_preview">
+	<h2>Tasks</h2>
+</a>
 
-<a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/notes" ); ?>">Notes</a>
+<a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/notes" ); ?>" class="project_preview">
+	<h2>Notes</h2>
+</a>
 
-<a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/people" ); ?>">People</a>
+<a href="<?php p( OCP\Util::linkTo( 'projects', 'index.php' ) . "/id/" . $project['id'] . "/people" ); ?>" class="project_preview">
+	<h2>People</h2>
+</a>
 
-<a id='archive_project' data-project_id='<?php p($project['id']); ?>'>Archive Project</a>
+<a id='archive_project' data-project_id='<?php p($project['id']); ?>' class="project_preview">
+	<h2>Archive Project</h2>
+</a>

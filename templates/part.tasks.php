@@ -12,7 +12,7 @@ $calendar_id = $project['calendar_id'];
 $calendar = OC_Calendar_Calendar::find($calendar_id);
 date_default_timezone_set(OC_Calendar_App::getTimezone()); 
 
-$query = OCP\DB::prepare( 'SELECT * FROM `*PREFIX*calendar_objects` WHERE `calendarid` = ? AND objecttype = "VTODO"' );
+$query = OCP\DB::prepare( 'SELECT * FROM *PREFIX*calendar_objects WHERE calendarid = ? AND objecttype = "VTODO"' );
 $result = $query->execute(array($calendar_id));
 $calendar_tasks = $result->fetchAll();
 
@@ -49,7 +49,7 @@ foreach( $calendar_tasks as $task ) {
 
 <form id="new_task" class="hidden">
 	<input type="hidden" id="project_id" name="project_id" value="<?php p($project['id']); ?>" />
-	<input type="hidden" id="calendar_id" name="calendar_id" value="<?php p($project['calendar_id']); ?>" />
+	<input type="hidden" id="calendar_id" name="calendar_id" value="<?php p($calendar_id); ?>" />
 	<p>
 		<input type="text" id="new_summary" placeholder="Add a new task" name="summary" autocomplete="off" />
 	</p>
@@ -75,41 +75,6 @@ foreach( $calendar_tasks as $task ) {
 	</p>
 	<p>
 		<button name="add_task" id="new_add" ><i class='icon-plus'></i>Add this task</button> or <button id="cancel_new_task" class="tag"><i class="icon-remove"></i> Cancel task</button>
-	</p>
-</form>
-
-
-<form id="edit_task" class="hidden">
-	<input id="task_id" type="hidden" name="id" />
-	<p>
-		<label for="summary" class="hidden">Title</label>
-		<input id="summary" name="summary" type="text" placeholder="Title" autocomplete="off" />
-	</p>
-	<p>
-		<label for="due">Due</label>
-		<input id="due" name="due" type="date" />
-	</p>
-	<p>
-		<label for="assign">Assign</label>
-		<input id="assign" name="assign" type="text" placeholder="Unassigned" autocomplete="off" />
-	</p>
-	<p>
-		<label for="priority">Priority</label>
-		<select id="priority" name="priority">
-			<option value="">None</option>
-			<option value="9">Low</option>
-			<option value="5">Medium</option>
-			<option value="1">High</option>
-		</select>
-	</p>
-	<p>
-		<label class="hidden" for="notes">Notes</label>
-		<textarea id="notes" name="notes" placeholder="Notes"></textarea>
-	</p>
-	<p>
-		<button id="update_task"><i class="icon-ok"></i> Save changes</button>
-		<button id="cancel_task"><i class="icon-remove"></i> Cancel</button>
-		<button id="delete_task"><i class="icon-trash"></i> Delete</button>
 	</p>
 </form>
 
@@ -151,3 +116,48 @@ foreach( $calendar_tasks as $task ) {
 		</li>
 	<?php } ?>
 </ul>
+
+<?php if ($item) { foreach ($tasks as $task) { if ($task['id'] === $item ) { ?>
+	<form id="edit_task"<?php if($task['complete'] == 100) p(" class='complete'"); ?>>
+		<input id="task_id" type="hidden" name="id" value="<?php p($task['id']); ?>"/>
+		<p>
+			<label for="summary" class="hidden">Title</label>
+			<input class="task_complete" type="checkbox" name="complete"<?php p($task['complete'] == 100 ? " checked" : "" ); ?>/>
+			<input id="summary" name="summary" type="text" placeholder="Title" autocomplete="off" value="<?php p($task['summary']); ?>"/>
+		</p>
+		<p>
+			<label for="due">Due</label>
+			<input id="due" name="due" type="date" value="<?php if($task['due']) p(date("Y-m-d", $task['due'])); ?>" />
+		</p>
+		<p>
+			<label>Completed</label>
+			<span><?php if($task['completed']) p(date("D, M j", strtotime($task['completed'] ))); ?></span>
+		</p>
+		<p>
+			<label for="assign">Assign</label>
+			<input id="assign" name="assign" type="text" placeholder="Unassigned" autocomplete="off" value="<?php p($task['assigned_to']); ?>"/>
+		</p>
+		<p>
+			<label>Completed by</label>
+			<span><?php p($task['completed_by']); ?></span>
+		</p>
+		<p>
+			<label for="priority">Priority</label>
+			<select id="priority" name="priority">
+				<option value="">None</option>
+				<option value="9"<?php if ($task['priority'] > 6 && $task['priority'] <= 9 ) p(' selected'); ?>>Low</option>
+				<option value="5"<?php if ($task['priority'] > 3 && $task['priority'] < 7 ) p(' selected'); ?>>Medium</option>
+				<option value="1"<?php if ($task['priority'] >= 1 && $task['priority'] <= 4 ) p(' selected'); ?>>High</option>
+			</select>
+		</p>
+		<p>
+			<label class="hidden" for="notes">Notes</label>
+			<textarea id="notes" name="notes" placeholder="Notes"><?php p($task['description']); ?></textarea>
+		</p>
+		<p>
+			<button id="update_task"><i class="icon-ok"></i> Save changes</button>
+			<button id="cancel_task"><i class="icon-remove"></i> Cancel</button>
+			<button id="delete_task"><i class="icon-trash"></i> Delete</button>
+		</p>
+	</form>
+<?php }}} ?>

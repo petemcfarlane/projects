@@ -79,7 +79,7 @@ if ( $_POST['calendar_id'] === '0' ){
 	// Share the calendar, full privs, with all users.
 	try {
 		$query = OCP\DB::prepare( "SELECT users, creator FROM *PREFIX*projects WHERE id = ?");
-		$result = $query->execute( array( $_POST['project_id']) );
+		$result = $query->execute( array( $project_id ) );
 		$result = $result->fetchRow();
 		$users = explode(',', $result['users'], -1);
 		foreach ($users as $user) {

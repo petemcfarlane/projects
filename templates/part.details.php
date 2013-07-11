@@ -1,3 +1,10 @@
+<?php 
+$query 	 = OC_DB::prepare('SELECT * FROM *PREFIX*projects_meta WHERE project_id = ?');
+$result	 = $query->execute( array( $project['id'] ) );
+$details = $result->fetchAll();
+$preset_details = array("Type", "Platform", "Technical Authority", "Commercial Authority", "Minimum Quantity", "Ramp-up 1st year", "Ramp-up 2nd year", "Ramp-up 3rd year", "Territories", "Retailers", "BOM", "RRP", "License Fee", "Budget", 
+		"ODM / OEM" );
+?>
 <form id="edit_details">
 
 	<input id="project_id" name="project_id" value="<?php print $project['id']; ?>" type="hidden" />
@@ -8,7 +15,21 @@
 		<label id="project_description_label" for="project_description" class="hidden">Project Description</label>
 		<input id="project_description" name="description" type="text" placeholder="Add a project description" value="<?php print $project['description']; ?>" />
 	</p>
-	<p>
+	
+	
+	<?php
+	foreach ($details as $detail) { ?>
+		<p>
+			<label for="in_<?php p($detail['meta_key']); ?>"><?php p($detail['meta_key']); ?></label>
+			<input id="in_<?php p($detail['meta_key']); ?>" name="<?php p($detail['meta_key']); ?>" value="<?php p($detail['meta_value']); ?>" type="text" />
+		</p>
+	<?php 
+	$pos = array_search($detail['meta_key'], $preset_details);
+	unset( $preset_details[$pos] ); 
+	}
+	 
+	 
+	 /*<p>
 		<label for="type">Type:</label>
 		<input id="type" name="project_type" value="<?php print $project['project_type']; ?>" type="text" />
 	</p>
@@ -70,5 +91,16 @@
 	<p>
 		<label for="odm_oem">Preferred ODM / OEM:</label>
 		<input id="odm_oem" name="odm_oem" type="text" value="<?php print $project['odm_oem']; ?>" />
+	</p> */?>
+	<p>
+		<label for="new_detail">Add another detail:</label>
+		<select id="new_detail">
+			<option></option>
+			<?php foreach ($preset_details as $key) { ?>
+				<option><?php p($key); ?></option>
+			<?php } ?>
+			<option value="other">Other...</option>
+		</select>
 	</p>
+
 </form>
