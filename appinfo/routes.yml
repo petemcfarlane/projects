@@ -1,0 +1,37 @@
+routes:
+  - name: project#index
+    url: /
+    verb: GET
+
+  - name: project#newForm
+    url: /new
+    verb: GET
+
+  # - name: project#edit
+    # url: /project/{Id}/edit
+    # verb: GET
+# 
+  # - name: project#update
+    # url: /project/{Id}/edit
+    # verb: POST
+# 
+  # - name: project#create
+    # url: /new
+    # verb: POST
+# 
+  # - name: project#show
+    # url: /project/{Id}
+    # verb: GET
+# 
+  # - name: project#delete
+    # url: /project/{Id}/delete
+    # verb: GET
+# 
+  # - name: project#destroy
+    # url: /project/{Id}/destroy
+    # verb: POST
+# 
+#resources:
+#    project:
+#      url: /project
+#      params: key
