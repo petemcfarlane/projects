@@ -4,13 +4,13 @@ namespace OCA\Projects\Controller;
 /*
 use \Exception;
 use \OCA\AppFramework\Http\JSONResponse;
-use \OCA\AppFramework\Http\RedirectResponse;
-use \OCA\SalesQuestionnaire\Db\Questionnaire;
-use \OCA\SalesQuestionnaire\Db\QuestionnaireMapper;
 */
-use \OCA\AppFramework\Http\TemplateResponse;
 use \OCA\AppFramework\Http\Request;
+use \OCA\AppFramework\Http\TemplateResponse;
+use \OCA\AppFramework\Http\RedirectResponse;
 use \OCA\AppFramework\Utility\ControllerTestUtility;
+use \OCA\Projects\Db\Project;
+use \OCA\Projects\Db\ProjectMapper;
 require_once(__DIR__ . "/../classloader.php");
 
 class ProjectControllerTest extends ControllerTestUtility {
@@ -20,7 +20,7 @@ class ProjectControllerTest extends ControllerTestUtility {
 	private $controller;
 
 	public function setUp() {
-		$this->api = $this->getAPIMock();
+		$this->api = $this->getAPIMock('OCA\Projects\Core\API');
 		$this->request = new Request();
 		$this->controller = new ProjectController($this->api, $this->request);
 	}
@@ -40,11 +40,11 @@ class ProjectControllerTest extends ControllerTestUtility {
 	}
 	
 	public function testIndexReturnsIndexTemplate() {
-		$this->api->expects($this->once())
-				  ->method('getUserId')
-				  ->will($this->returnValue('Foo Bar'));
+		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo Bar'));
 		
-		\OCP\Share::registerBackend('projects', '\OCA\Projects\Lib\Share\ShareProject');
+		$mockSharedProjects = array('Shared Project 1', 'Shared Project 2', 'Shared Project 3');
+		$this->api->expects($this->once())->method('getItemsSharedWith')->will($this->returnValue($mockSharedProjects));
+		
 		$response = $this->controller->index();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response);
 		$this->assertEquals('index', $response->getTemplateName());
@@ -63,11 +63,39 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->assertEquals('new', $response->getTemplateName());
 	}
 
+	public function testCreateReturnsCorrectRedirectResponse() {
+		$mockProject = new Project(array('id'=>123));
+		$projectMapper = $this->getMock('ProjectMapper', array('insert'));
+		$projectMapper->expects($this->once())->method('insert')->will($this->returnValue($mockProject));
+		
+		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/project/123'));
+		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
+		
+		$response = $this->controller->create();
+
+		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response);
+		$this->assertEquals('index.php/projects/project/123', $response->getRedirectURL());
+	}
+
+	public function testShowProjectDoesNotExist() {
+		
+	}
+
+	public function testShowProjectExistsButNotOwnedByUserOrNoReadPermissions() {
+		
+	}
+
+	public function testShowsProjectIfOwnedByUser() {
+		$this->assertInstanceOf('OCA\AppFramework\Http\TemplateResponse', $response);
+		$this->assertEquals('show', $response->getTemplateName());
+		
+	}
+
 	public function testAnnotations(){
 		$annotations = array('IsAdminExemption', 'IsSubAdminExemption', 'CSRFExemption');
 		$this->assertAnnotations($this->controller, 'index', $annotations);
 		$this->assertAnnotations($this->controller, 'newForm', $annotations);
-		// $this->assertAnnotations($this->controller, 'show', $annotations);
+		$this->assertAnnotations($this->controller, 'show', $annotations);
 		// $this->assertAnnotations($this->controller, 'edit', $annotations);
 		// $this->assertAnnotations($this->controller, 'delete', $annotations);
 		
@@ -77,7 +105,4 @@ class ProjectControllerTest extends ControllerTestUtility {
 		// $this->assertAnnotations($this->controller, 'destroy', $annotations);
 	}
 
-	public function testCreate() {
-		//
-	}
 }

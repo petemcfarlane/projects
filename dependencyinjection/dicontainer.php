@@ -2,6 +2,8 @@
 
 namespace OCA\Projects\DependencyInjection;
 
+
+use \OCA\Projects\Core\API;
 use \OCA\AppFramework\DependencyInjection\DIContainer as BaseContainer;
 use \OCA\Projects\Controller\ProjectController;
 
@@ -10,6 +12,10 @@ class DIContainer extends BaseContainer {
     public function __construct(){
         parent::__construct('projects');
 		
+		$this['API'] = $this->share(function($c){
+			return new API($c['AppName']);
+		});
+
         // use this to specify the template directory
         $this['TwigTemplateDirectory'] = __DIR__ . '/../templates';
 

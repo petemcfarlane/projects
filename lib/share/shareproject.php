@@ -3,6 +3,8 @@ namespace OCA\Projects\Lib\Share;
 
 class ShareProject implements \OCP\Share_Backend {
 	
+	private $project;
+	
 	const FORMAT_PROJECT = 0;
 
 	/**
@@ -28,18 +30,15 @@ class ShareProject implements \OCP\Share_Backend {
 */
 	
 	public function isValidSource($itemSource, $uidOwner) {
-		return true;
-	/*	$query  = \OCP\DB::prepare('SELECT * FROM `*PREFIX*salesquestionnaire` WHERE `id` = ? AND `uid` = ?');
+		$query  = \OCP\DB::prepare('SELECT * FROM `*PREFIX*projects` WHERE `id` = ? AND `uid` = ?');
 		$result = $query->execute( array($itemSource, $uidOwner) );
-		self::$salesquestionnaire = $result->fetchRow();
-		if (self::$salesquestionnaire) return true;
+		$this->project = $result->fetchRow();
+		if ($this->project) return true;
 		return false;
-	 */
 	}
 
 	public function generateTarget($itemSource, $shareWith, $exclude = null) {
-		return $itemSource;
- 		// return self::$salesquestionnaire['id'];
+		return $project['id'];
 	}
 
 	public function formatItems($items, $format, $parameters = null) {

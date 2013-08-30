@@ -7,6 +7,10 @@ routes:
     url: /new
     verb: GET
 
+  - name: project#show
+    url: /project/{Id}
+    verb: GET
+
   # - name: project#edit
     # url: /project/{Id}/edit
     # verb: GET
@@ -18,10 +22,6 @@ routes:
   # - name: project#create
     # url: /new
     # verb: POST
-# 
-  # - name: project#show
-    # url: /project/{Id}
-    # verb: GET
 # 
   # - name: project#delete
     # url: /project/{Id}/delete
