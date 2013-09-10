@@ -42,6 +42,7 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->assertAnnotations($this->controller, 'show', $annotations);
 		$this->assertAnnotations($this->controller, 'edit', $annotations);
 		$this->assertAnnotations($this->controller, 'delete', $annotations);
+		
 		$annotations = array('IsAdminExemption', 'IsSubAdminExemption');
 		$this->assertAnnotations($this->controller, 'create', $annotations);
 		$this->assertAnnotations($this->controller, 'update', $annotations);
@@ -72,6 +73,7 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$projectMapper = $this->getMock('ProjectMapper', array('getProjects'));
 		$projectMapper->expects($this->once())->method('getProjects')->will($this->returnValue(null));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
+		
 		$response = $this->controller->getProjects('Foo');
 		$this->assertEmpty($response);
 	}
@@ -113,16 +115,18 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->assertEquals('new', $response->getTemplateName());
 	}
 
-	public function testCreateReturnsCorrectTemplateResponse() {
-		$mockProjects = array('Project 1', 'Project 2');
-		$projectMapper = $this->getMock('ProjectMapper', array('insert', 'getProjects'));
-		$projectMapper->expects($this->once())->method('insert')->will($this->returnValue($mockProjects));
-		$projectMapper->expects($this->once())->method('getProjects')->will($this->returnValue($mockProjects));
-		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo Bar'));
+	public function testCreateReturnsCorrectRedirectResponse() {
+		$mockProject = new Project(array('id'=>123));
+		$projectMapper = $this->getMock('ProjectMapper', array('insert'));
+		$projectMapper->expects($this->once())->method('insert')->will($this->returnValue($mockProject));
+		
+		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/project/123'));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
+		
 		$response = $this->controller->create();
-		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response);
-		$this->assertEquals('index', $response->getTemplateName());
+
+		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response);
+		$this->assertEquals('index.php/projects/project/123', $response->getRedirectURL());
 	}
 
 	/**
@@ -289,6 +293,7 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'update'));
 		$projectMapper->expects($this->once())->method('update')->will($this->returnValue($mockProject));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue($mockProject));
+		
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->update();
 		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);

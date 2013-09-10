@@ -1,0 +1,1 @@
+<?php header("Location: " . \OCP\Util::linkToRoute("projects.project.index") );

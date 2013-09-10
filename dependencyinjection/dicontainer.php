@@ -6,6 +6,7 @@ namespace OCA\Projects\DependencyInjection;
 use \OCA\Projects\Core\API;
 use \OCA\AppFramework\DependencyInjection\DIContainer as BaseContainer;
 use \OCA\Projects\Controller\ProjectController;
+use \OCA\Projects\Controller\DetailController;
 
 class DIContainer extends BaseContainer {
 
@@ -21,6 +22,10 @@ class DIContainer extends BaseContainer {
 
         $this['ProjectController'] = function($c){
             return new ProjectController($c['API'], $c['Request']);
+        };
+
+        $this['DetailController'] = function($c){
+            return new DetailController($c['API'], $c['Request']);
         };
     }
 

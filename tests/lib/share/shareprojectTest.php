@@ -3,6 +3,7 @@ namespace OCA\Projects\Lib\Share;
 
 use \OCA\AppFramework\Utility\TestUtility;
 require_once(__DIR__ . "/../../classloader.php");
+require_once(__DIR__ . "/../../../../../lib/public/share.php");
 class ShareProjectTest extends TestUtility {
 	
 	public function testIsValidSource() {

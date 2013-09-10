@@ -3,34 +3,74 @@ routes:
     url: /
     verb: GET
 
+  - name: project#create
+    url: /
+    verb: POST
+
   - name: project#newForm
     url: /new
     verb: GET
 
   - name: project#show
-    url: /project/{Id}
+    url: /project/{id}
     verb: GET
 
-  # - name: project#edit
-    # url: /project/{Id}/edit
-    # verb: GET
-# 
+  - name: project#edit
+    url: /project/{id}/edit
+    verb: GET
+
+  - name: project#update
+    url: /project/{id}/edit
+    verb: POST
+
   # - name: project#update
-    # url: /project/{Id}/edit
-    # verb: POST
-# 
-  # - name: project#create
-    # url: /new
-    # verb: POST
-# 
-  # - name: project#delete
-    # url: /project/{Id}/delete
-    # verb: GET
-# 
+    # url: /project/{id}
+    # verb: PUT
+
+  - name: project#delete
+    url: /project/{id}/delete
+    verb: GET
+
+  - name: project#destroy
+    url: /project/{id}/destroy
+    verb: POST
+
   # - name: project#destroy
-    # url: /project/{Id}/destroy
-    # verb: POST
+    # url: /project/{id}
+    # verb: DELETE
 # 
+  - name: detail#index
+    url: /project/{id}/detail
+    verb: GET
+
+  - name: detail#create
+    url: /project/{id}/detail
+    verb: POST
+
+  - name: detail#show
+    url: /project/{id}/detail/{detailKey}
+    verb: GET
+
+  # - name: detail#edit
+    # url: /project/{id}/detail/{detailKey}/edit
+    # verb: GET
+
+  # - name: detail#update
+    # url: /project/{id}/detail/{detailKey}
+    # verb: PUT
+
+  - name: detail#update
+    url: /project/{id}/detail/{detailKey}/edit
+    verb: POST
+
+  - name: detail#delete
+    url: /project/{id}/detail/{detailKey}/delete
+    verb: GET
+
+  - name: detail#destroy
+    url: /project/{id}/detail/{detailKey}/delete
+    verb: POST
+
 #resources:
 #    project:
 #      url: /project

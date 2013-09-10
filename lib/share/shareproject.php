@@ -12,7 +12,7 @@ class ShareProject implements \OCP\Share_Backend {
 	 * @param string $columnName the name of the column
 	 * @return string the property name
 	 */
-/*
+
 	public function columnToProperty($columnName){
 		$parts = explode('_', $columnName);
 		$property = null;
@@ -27,7 +27,7 @@ class ShareProject implements \OCP\Share_Backend {
 
 		return $property;
 	}
-*/
+
 	
 	public function isValidSource($itemSource, $uidOwner) {
 		$query  = \OCP\DB::prepare('SELECT * FROM `*PREFIX*projects` WHERE `id` = ? AND `uid` = ?');
@@ -42,7 +42,29 @@ class ShareProject implements \OCP\Share_Backend {
 	}
 
 	public function formatItems($items, $format, $parameters = null) {
-		return array('shared project 1', 'shared project 2');
+		$projects = array();
+		if ($format !== self::FORMAT_PROJECT) return null;
+		foreach ($items as $item) {
+			$query = \OCP\DB::prepare('SELECT * FROM `*PREFIX*projects` WHERE `id` = ?');
+			$result = $query->execute( array($item['item_source']));
+			$row = $result->fetchRow();
+			if ($row) {
+				$project = array();
+				foreach ($row as $property => $value) {
+					$newProperty = self::columnToProperty($property);
+					$project[$newProperty] = $value;
+				}
+				if ($item['permissions'] & \OCP\PERMISSION_CREATE) $project['permissions'][] = "create";
+				if ($item['permissions'] & \OCP\PERMISSION_READ)   $project['permissions'][] = "read";
+				if ($item['permissions'] & \OCP\PERMISSION_UPDATE) $project['permissions'][] = "update";
+				if ($item['permissions'] & \OCP\PERMISSION_DELETE) $project['permissions'][] = "delete";
+				if ($item['permissions'] & \OCP\PERMISSION_SHARE)  $project['permissions'][] = "share";
+				$project['uid_owner'] = $item['uid_owner'];
+				$project['displayname_owner'] = $item['displayname_owner'];
+				$projects[] = $project;
+			}
+		}
+		return $projects;
 		/*
 		$salesquestionnaires = array();
 				if ($format == self::FORMAT_QUESTIONNAIRE) {

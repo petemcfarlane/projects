@@ -3,7 +3,7 @@ namespace OCA\Projects\Db;
 
 use \OCA\AppFramework\Db\Mapper;
 use \OCA\AppFramework\Core\API;
-
+use \OCA\Projects\Db\Project;
 
 class ProjectMapper extends Mapper {
 
@@ -12,19 +12,36 @@ class ProjectMapper extends Mapper {
       parent::__construct($api, 'projects');
     }
 
-	public function getProjects($uid) {
-		return array('project1', 'project2', 'project3');
-	}
-/*
 	protected function findAllRows($sql, $params, $limit=null, $offset=null) {
 		$result = $this->execute($sql, $params, $limit, $offset);
-		$questionnaires = array();
+		$projects = array();
 		while($row = $result->fetchRow()){
-			$questionnaire = new Questionnaire($row);
-			array_push($questionnaires, $questionnaire);
+			$project = new Project($row);
+			array_push($projects, $project);
 		}
-		return $questionnaires;
+		return $projects;
 	}
+
+	public function getProjects($uid) {
+		$sql = 'SELECT * FROM `' . $this->getTableName() . '` WHERE `uid` = ?';
+        $projects = $this->findAllRows($sql, array($uid));
+        return $projects;
+	}
+	
+	public function getProject($id, $uid) {
+		$sql = 'SELECT * FROM `' . $this->getTableName() . '` WHERE `id` = ? AND `uid` = ?';
+		$result = $this->execute($sql, array($id, $uid) );
+		$row = $result->fetchRow();
+		return ($row === null || $row === false) ? null : new Project($row);
+	}
+	
+	public function findProjectById($id) {
+		$sql = 'SELECT * FROM `' . $this->getTableName() . '` WHERE `id` = ?';
+		$result = $this->execute($sql, array($id) );
+		$row = $result->fetchRow();
+		return ($row === null || $row === false) ? null : new Project($row);
+	}
+/*
 
 	public function findById($Id) {
 		$sql = 'SELECT * FROM `' . $this->getTableName() . '` WHERE `id` = ?';
