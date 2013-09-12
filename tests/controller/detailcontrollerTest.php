@@ -348,7 +348,7 @@ class DetailControllerTest extends ControllerTestUtility {
 		$mockProject = new Project(array('id'=>123, 'permissions'=>array('update')));
 		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($mockProject));
 		$mockDetail = $this->getMock('Detail', array('setDetailValue', 'getDetailKey'));
-		$mockDetail->expects($this->once())->method('getDetailKey')->will($this->returnValue('Fish'));
+		//$mockDetail->expects($this->once())->method('getDetailKey')->will($this->returnValue('Fish'));
 		$mockDetailMapper = $this->getMock('DetailMapper', array('update', 'getDetail'));
 		$mockDetailMapper->expects($this->once())->method('getDetail')->will($this->returnValue($mockDetail));
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/project/123/detail'));

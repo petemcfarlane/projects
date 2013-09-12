@@ -38,7 +38,18 @@ class ShareProject implements \OCP\Share_Backend {
 	}
 
 	public function generateTarget($itemSource, $shareWith, $exclude = null) {
-		return $project['id'];
+
+
+
+
+
+// NEEDS LOOKING INTO!!!
+
+
+
+
+		return ($itemSource);
+		// return $project['id'];
 	}
 
 	public function formatItems($items, $format, $parameters = null) {
