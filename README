@@ -1,0 +1,36 @@
+Projects
+
+• Task orientated
+• Log meetings
+• List details
+
+Routes
+
+projects
+	index 		/ 						GET
+	create 		/ 						POST
+//	newForm 	/new 					GET
+	show 		/project/{id} 			GET
+
+//	edit 		/project/{id}/edit 		GET
+//	update 		/project/{id}/edit 		POST
+//	delete 		/project/{id}/delete 	GET
+//	destroy 	/project/{id}/destroy 	POST
+
+details
+	index 		/project/{id}/detail 					GET
+	create 		/project/{id}/detail 					POST
+	show 		/project/{id}/detail/{detailKey} 		GET
+	update		/project/{id}/detail					PUT
+	destroy		/project/{id}/detail					DELETE
+	update 		/project/{id}/detail/{detailKey}/edit 	POST
+	delete 		/project/{id}/detail/{detailKey}/delete GET
+	destroy 	/project/{id}/detail/{detailKey}/delete POST
+
+meetings
+	index
+	create
+	show
+	update
+	delete
+	destroy
