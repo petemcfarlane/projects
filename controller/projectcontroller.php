@@ -174,14 +174,15 @@ class ProjectController extends Controller {
 		$project = (array)$this->projectMapper->getProject($id, $uid);
 		if (!$project) {
 			$shared = $this->api->getItemSharedWith('projects', $id);
-			$project = (array)$this->projectMapper->findProjectById( $shared['item_target'] );
+			if (!$shared) return array();
+			$project = (array)$this->projectMapper->findProjectById( $shared['item_source'] );
 			if ($shared['permissions'] & \OCP\PERMISSION_CREATE) $project['permissions'][] = "create";
 			if ($shared['permissions'] & \OCP\PERMISSION_READ)   $project['permissions'][] = "read";
 			if ($shared['permissions'] & \OCP\PERMISSION_UPDATE) $project['permissions'][] = "update";
 			if ($shared['permissions'] & \OCP\PERMISSION_DELETE) $project['permissions'][] = "delete";
 			if ($shared['permissions'] & \OCP\PERMISSION_SHARE)  $project['permissions'][] = "share";
 		}
-		return $project ? $project : array();
+		return $project;
 	}
 	
 	public function getParams() {

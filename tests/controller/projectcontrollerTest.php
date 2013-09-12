@@ -149,13 +149,15 @@ class ProjectControllerTest extends ControllerTestUtility {
 	}
 	
 	public function testGetProjectWithSharedProject() {
-		$project = array('id'=>42, 'uid'=>'Bar', 'permissions'=>array('read','update'));
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($project));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject'));
+		$result = array('id'=>42, 'uid'=>'Bar');
+		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
+		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($result));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->getProject(42, 'Foo');
-		$this->assertEquals($project, $response);
+		$this->assertEquals(array('id'=>42, 'uid'=>'Bar', 'permissions'=>array('read','share')), $response);
 	}
 
 	public function testGetProjectWhenProjectDoesNotExist() {
@@ -171,7 +173,8 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->request = new Request(array('get'=>array('id'=>999)));
 		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo Bar'));
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject'));
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue(null));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'getItemSharedWith'));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->show();
@@ -196,8 +199,8 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo'));
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
 		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array());
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($mockSharedProject));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject'));
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue(null));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->show();
@@ -208,10 +211,12 @@ class ProjectControllerTest extends ControllerTestUtility {
 	public function testShowSharedProjectWithReadPerms() {
 		$this->request = new Request(array('get'=>array('id'=>999)));
 		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo'));
-		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('read'));
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($mockSharedProject));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject'));
+		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
+		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('read'));
+		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->show();
 		$this->assertInstanceOf('OCA\AppFramework\Http\TemplateResponse', $response);
@@ -246,10 +251,12 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->request = new Request(array('get'=>array('id'=>999)));
 		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo'));
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
-		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('read'));
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($mockSharedProject));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject'));
+		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
+		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('read'));
+		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->edit();
 		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
@@ -259,10 +266,12 @@ class ProjectControllerTest extends ControllerTestUtility {
 	public function testEditProjectIsSharedAndUserHasUpdatePerm() {
 		$this->request = new Request(array('get'=>array('id'=>999)));
 		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo'));
-		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('update'));
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($mockSharedProject));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject'));
+		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
+		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('update'));
+		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->edit();
 		$this->assertInstanceOf('OCA\AppFramework\Http\TemplateResponse', $response);
@@ -279,6 +288,7 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$response = $this->controller->update();
 		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
 		$this->assertEquals('index.php/projects/', $response->getRedirectURL());
+
 	}
 	
 	public function testUpdateProjectByUser() {
@@ -296,29 +306,35 @@ class ProjectControllerTest extends ControllerTestUtility {
 	}
 	
 	public function testUpdateProjectIsSharedButUserDoesNotHaveUpdatePerm() {
-		$mockSharedProject = new Project( array('id'=>999, 'uid'=>'Bar', 'projectName'=>'ACME') );
+		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'projectName'=>'ACME');
 		$this->request = new Request(array('post'=>array('id'=>999, 'projectName'=>'technologique')));
 		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo'));
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($mockSharedProject));
+		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'update'));
-		$projectMapper->expects($this->once())->method('update')->will($this->returnValue($mockSharedProject));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
+		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('read'));
+		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->update();
 		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
 		$this->assertEquals('index.php/projects/', $response->getRedirectURL());
 	}
+
 	
 	public function testUpdateProjectIsSharedAndUserHasUpdatePerm() {
 		$mockSharedProject = new Project( array('id'=>999, 'uid'=>'Bar', 'projectName'=>'ACME') );
 		$this->request = new Request(array('post'=>array('id'=>999, 'projectName'=>'technologique', 'permissions'=>array('update'))));
 		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo'));
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($mockSharedProject));
+		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/project/999'));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'update'));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'update', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('update')->will($this->returnValue($mockSharedProject));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
+		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('update'));
+		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->update();
 		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
@@ -353,10 +369,12 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->request = new Request(array('get'=>array('id'=>999)));
 		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo'));
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
-		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('read', 'update'));
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($mockSharedProject));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject'));
+		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
+		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('read'));
+		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->delete();
 		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
@@ -367,9 +385,12 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->request = new Request(array('get'=>array('id'=>999)));
 		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo'));
 		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('update','delete'));
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($mockSharedProject));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject'));
+		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
+		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('delete'));
+		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->delete();
 		$this->assertInstanceOf('OCA\AppFramework\Http\TemplateResponse', $response);
@@ -405,10 +426,13 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$mockSharedProject = new Project( array('id'=>999, 'uid'=>'Bar', 'projectName'=>'ACME') );
 		$this->request = new Request(array('post'=>array('id'=>999)));
 		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo'));
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($mockSharedProject));
+		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'delete'));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'delete', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
+		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('read'));
+		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->destroy();
 		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
@@ -419,10 +443,13 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$mockSharedProject = new Project( array('id'=>999, 'uid'=>'Bar', 'projectName'=>'ACME') );
 		$this->request = new Request(array('post'=>array('id'=>999, 'permissions'=>array('delete'))));
 		$this->api->expects($this->once())->method('getUserId')->will($this->returnValue('Foo'));
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($mockSharedProject));
+		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
+		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'delete'));
+		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'delete', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue(null));
+		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('delete'));
+		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->destroy();
 		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
