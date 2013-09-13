@@ -6,9 +6,6 @@ if ( !\OCP\App::isEnabled('appframework') ) {
 	 exit;
 }
 
-\OCP\Share::registerBackend('projects', '\OCA\Projects\Lib\Share\ShareProject');
-// \OC_Search::registerProvider('\OCA\SalesQuestionnaire\Lib\SearchProvider');
-
 $api = new \OCA\AppFramework\Core\API('projects');
 
 $api->addNavigationEntry(array(
@@ -16,5 +13,8 @@ $api->addNavigationEntry(array(
 	'order' => 10,
 	'href' => $api->linkToRoute('projects.project.index'),
 	'icon' => $api->imagePath('projects.svg'),
-	'name' => $api->getTrans()->t('Projects')
+	'name' => "Projects"
 )); 
+
+\OCP\Share::registerBackend('projects', '\OCA\Projects\Lib\Share\ShareProject');
+// \OC_Search::registerProvider('\OCA\SalesQuestionnaire\Lib\SearchProvider');

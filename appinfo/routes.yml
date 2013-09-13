@@ -71,6 +71,27 @@ routes:
     url: /project/{id}/detail/{detailKey}/delete
     verb: POST
 
+  - name: notes#index
+    url: /project/{id}/notes
+    verb: GET
+
+  - name: notes#create
+    url: /project/{id}/notes
+    verb: POST
+
+  - name: notes#show
+    url: /project/{id}/notes/{noteId}
+    verb: GET
+
+  - name: notes#update
+    url: /project/{id}/notes/{noteId}
+    verb: PUT
+
+  - name: notes#destroy
+    url: /project/{id}/notes/{noteId}
+    verb: DELETE
+
+
 #resources:
 #    project:
 #      url: /project

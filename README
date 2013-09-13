@@ -27,6 +27,13 @@ details
 	delete 		/project/{id}/detail/{detailKey}/delete GET
 	destroy 	/project/{id}/detail/{detailKey}/delete POST
 
+notes
+	index		/project/{id}/notes				GET
+	create		/project/{id}/notes				POST
+	show		/project/{id}/notes/{noteId}	GET
+	update		/project/{id}/notes				PUT
+	destroy		/project/{id}/notes				DELETE
+
 meetings
 	index
 	create

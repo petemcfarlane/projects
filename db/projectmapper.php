@@ -32,14 +32,14 @@ class ProjectMapper extends Mapper {
 		$sql = 'SELECT * FROM `' . $this->getTableName() . '` WHERE `id` = ? AND `uid` = ?';
 		$result = $this->execute($sql, array($id, $uid) );
 		$row = $result->fetchRow();
-		return ($row === null || $row === false) ? null : new Project($row);
+		return ($row === null || $row === false) ? null : new Project($row, $uid);
 	}
 	
-	public function findProjectById($id) {
+	public function findProjectById($id, $uid, $permissions=null) {
 		$sql = 'SELECT * FROM `' . $this->getTableName() . '` WHERE `id` = ?';
 		$result = $this->execute($sql, array($id) );
 		$row = $result->fetchRow();
-		return ($row === null || $row === false) ? null : new Project($row);
+		return ($row === null || $row === false) ? null : new Project($row, $uid, $permissions);
 	}
 /*
 

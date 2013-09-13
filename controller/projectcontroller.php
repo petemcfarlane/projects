@@ -66,9 +66,9 @@ class ProjectController extends Controller {
 	 * @IsSubAdminExemption
 	 */
 	public function show() {
-		$project = (array)$this->getProject($this->request->id, $this->api->getUserId());
-		if ( (isset($project['permissions']) && in_array('read',$project['permissions'])) || ($project && !isset($project['permissions'])) ) {
-			$this->params = array_merge($this->params, $project);
+		$project = $this->getProject($this->request->id, $this->api->getUserId());
+		if ( $project && $project->canRead() ) {
+			$this->params = array_merge($this->params, (array)$project);
         	return $this->render('show', $this->params, $this->renderas);
 		} else {
 			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
@@ -83,9 +83,9 @@ class ProjectController extends Controller {
 	 * @IsSubAdminExemption
 	 */
 	public function edit() {
-		$project = (array)$this->getProject($this->request->id, $this->api->getUserId());
-		if ( (isset($project['permissions']) && in_array('update',$project['permissions'])) || ($project && !isset($project['permissions'])) ) {
-			$this->params = array_merge($this->params, $project);
+		$project = $this->getProject($this->request->id, $this->api->getUserId());
+		if ( $project && $project->canUpdate() ) {
+			$this->params = array_merge($this->params, (array)$project);
 			return $this->render('edit', $this->params, $this->renderas);
 		} else {
 			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
@@ -100,21 +100,19 @@ class ProjectController extends Controller {
 	 */
 	public function update() {
 		$uid = $this->api->getUserId();
-		$project = (array)$this->getProject($this->request->id, $uid);
-		if ( (isset($project['permissions']) && in_array('update', $project['permissions'])) || ($project && !isset($project['permissions'])) ) {
+		$project = $this->getProject($this->request->id, $uid);
+		if ( $project && $project->canUpdate() ) {
 			$project = $this->projectFromRequest($this->request);
 			$project->setId($this->request->id);
 			$project->setUpdatedAt(date("Y-m-d H:i:s"));
 			$project->setModifiedBy($uid);
 			$this->projectMapper->update($project);
 			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.show', array('id'=>$project->getId())) );
-			$response->setStatus(303);
-			return $response;
 		} else {
 			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
-			$response->setStatus(303);
-			return $response;
 		}
+		$response->setStatus(303);
+		return $response;
 	}
 
 	/**
@@ -123,9 +121,9 @@ class ProjectController extends Controller {
 	 * @IsSubAdminExemption
 	 */
 	public function delete() {
-		$project = (array)$this->getProject($this->request->id, $this->api->getUserId());
-		if ( (isset($project['permissions']) && in_array('delete',$project['permissions'])) || ($project && !isset($project['permissions'])) ) {
-			$this->params = array_merge($this->params, $project);
+		$project = $this->getProject($this->request->id, $this->api->getUserId());
+		if ( $project && $project->canDelete() ) {
+			$this->params = array_merge($this->params, (array)$project);
         	return $this->render('delete', $this->params, $this->renderas);
 		} else {
 			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
@@ -140,17 +138,12 @@ class ProjectController extends Controller {
 	 */
 	public function destroy() {
 		$project = $this->getProject($this->request->id, $this->api->getUserId());
-		$projectArr = (array)$project;
-		if ( (isset($projectArr['permissions']) && in_array('delete', $projectArr['permissions'])) || ($projectArr && !isset($projectArr['permissions'])) ) {
+		if ( $project && $project->canDelete() ) {
 			$this->projectMapper->delete($project);
-			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
-			$response->setStatus(303);
-			return $response;
-		} else {
-			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
-			$response->setStatus(303);
-			return $response;
 		}
+		$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
+		$response->setStatus(303);
+		return $response;
 	}
 
 	public function projectFromRequest($request=null) {
@@ -171,16 +164,10 @@ class ProjectController extends Controller {
 	public function getProject($id=null, $uid=null) {
 		if ($id===null) Throw new \InvalidArgumentException("Project id Not specified");
 		if ($uid===null) Throw new \InvalidArgumentException("User id Not specified");
-		$project = (array)$this->projectMapper->getProject($id, $uid);
+		$project = $this->projectMapper->getProject($id, $uid);
 		if (!$project) {
 			$shared = $this->api->getItemSharedWith('projects', $id);
-			if (!$shared) return array();
-			$project = (array)$this->projectMapper->findProjectById( $shared['item_source'] );
-			if ($shared['permissions'] & \OCP\PERMISSION_CREATE) $project['permissions'][] = "create";
-			if ($shared['permissions'] & \OCP\PERMISSION_READ)   $project['permissions'][] = "read";
-			if ($shared['permissions'] & \OCP\PERMISSION_UPDATE) $project['permissions'][] = "update";
-			if ($shared['permissions'] & \OCP\PERMISSION_DELETE) $project['permissions'][] = "delete";
-			if ($shared['permissions'] & \OCP\PERMISSION_SHARE)  $project['permissions'][] = "share";
+			$project = $this->projectMapper->findProjectById( $shared['item_source'], $uid, $shared['permissions'] );
 		}
 		return $project;
 	}
@@ -193,14 +180,4 @@ class ProjectController extends Controller {
 		return $this->renderas;
 	}
 	
-	/**
-	 * @CSRFExemption
-	 * @IsAdminExemption
-	 * @IsSubAdminExemption
-	 */
-	public function createDetail() {
-		
-	}
-	
-
 }
