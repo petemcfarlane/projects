@@ -85,11 +85,11 @@ routes:
 
   - name: notes#update
     url: /project/{id}/notes/{noteId}
-    verb: PUT
+    verb: POST
 
   - name: notes#destroy
-    url: /project/{id}/notes/{noteId}
-    verb: DELETE
+    url: /project/{id}/notes/{noteId}/delete
+    verb: POST
 
 
 #resources:

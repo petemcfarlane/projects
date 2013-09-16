@@ -23,6 +23,7 @@ class ProjectController extends Controller {
 		$this->renderas = isset($_SERVER['HTTP_X_PJAX']) ? '' : 'user';
 		$this->api->addStyle('projects');
 		$this->api->addScript('3rdparty/jquery.autosize.min');
+		$this->api->addScript('3rdparty/jquery.pjax.min');
 		$this->api->addScript('projects');
 		$this->projectMapper = $projectMapper===null ? new ProjectMapper($this->api) : $projectMapper;
 	}

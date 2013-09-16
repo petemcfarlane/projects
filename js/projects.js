@@ -4,9 +4,13 @@ $(document).ready(function () {
 	 * PJAX
 	 * -----------------------*/
 	
-	// if ($.support.pjax) {
-		// $(document).pjax('#content a', '#content'); // every 'a' within '#content' to be clicked will load the content in '#content'
-	// }
+	if ($.support.pjax) {
+		$(document).pjax('#content a', '#content'); // every 'a' within '#content' to be clicked will load the content in '#content'
+
+		$(document).on('submit', '#content form', function(e) {
+			$.pjax.submit(e, '#content');
+		});
+	}
 	
     // $('.project-name').click(function(){
         // $(this).parent().find('.block').slideToggle('fast');
@@ -48,5 +52,10 @@ $(document).ready(function () {
         $("#select-add-field option[value='"+item.value+"']").remove();
         // console.log(item.value);
     });
+    
+    /*
+     * Notes
+     */
+    $('.paper textarea').autosize();
 
 });

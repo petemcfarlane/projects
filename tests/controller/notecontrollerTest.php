@@ -6,19 +6,11 @@ use \OCA\AppFramework\Http\Request;
 use \OCA\Projects\Db\Project;
 use \OCA\AppFramework\Http\RedirectResponse;
 use \OCA\Projects\Db\Note;
-// use \OCA\AppFramework\Http\TemplateResponse;
-// use \OCA\AppFramework\Http\JSONResponse;
-// use \OCA\Projects\Db\DetailMapper;
-// use \OCA\Projects\Db\ProjectMapper;
-// use \OCA\Projects\Controller\ProjectController;
 require_once(__DIR__ . "/../classloader.php");
 
 class NotesControllerTest extends ControllerTestUtility {
 	
-	// private $api;
-	// private $request;
-	// private $controller;
-	// private $projectController;
+	private $mockNote;
 
 	public function setUp() {
 		$this->api = $this->getAPIMock('OCA\Projects\Core\API');
@@ -26,27 +18,57 @@ class NotesControllerTest extends ControllerTestUtility {
 		$this->request = new Request(array('get'=>array('id'=>123)));
 		$this->projectController = $this->getMock('ProjectController', array('getProject'));
 		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
+		$this->mockNote = new Note(array('id'=>10, 'projectId'=>123, 'note'=>'User note for the note'));
 	}
 
-	public function testIndexAnnotations(){
+	public function userOrSharedProject() {
+		return array(
+			array( new Project (array('id'=>123, 'uid'=>'Foo'), 'Foo') ),	 // user project
+			array( new Project (array('id'=>123, 'uid'=>'Bar'), 'Foo', 31) ) // shared project with all permissions
+		);
+	}
+
+	public function noProjectOrPermissions() {
+		return array(
+			array(null),													// no project found
+			array(new Project (array('id'=>123, 'uid'=>'Bar'), 'Foo', 0))	// shared project but no permissions
+		);
+	}
+	
+	public function noteProvider() {
+		return array(
+			array( new Note (array('id'=>50, 'projectId'=>123, 'note'=>'text text blah blah blah')) ) // sample note
+		);
+	}
+
+	public function testIndexAnnotations() {
 		$loggedIn = array('IsAdminExemption', 'IsSubAdminExemption');
 		$loggedInCSRF = array('IsAdminExemption', 'IsSubAdminExemption', 'CSRFExemption');
 		$this->assertAnnotations($this->controller, 'index', $loggedInCSRF);
 		$this->assertAnnotations($this->controller, 'show', $loggedInCSRF);
 		$this->assertAnnotations($this->controller, 'create', $loggedIn);
+		$this->assertAnnotations($this->controller, 'update', $loggedIn);
+		$this->assertAnnotations($this->controller, 'destroy', $loggedIn);
 	}
 
-	public function testIndexNoProject() {
+	/**
+	 * @dataProvider noProjectOrPermissions
+	 */
+	public function testIndexNoProjectOrNoReadPerm($project) {
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects'));
-		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$noteMapper = $this->getMock('NoteMapper', array('getNotes'));
+		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
 		$response = $this->controller->index();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
 		$this->assertEquals('index.php/apps/projects', $response->getRedirectUrl());
 	}
 
-	public function testIndexUserProject() {
-		$mockProject = new Project (array('id'=>123, 'uid'=>'Foo'), 'Foo');
-		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($mockProject));
+	/**
+	 * @dataProvider userOrSharedProject
+	 */
+	public function testIndexUserProjectOrSharedProject($project) {
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
 		$noteMapper = $this->getMock('NoteMapper', array('getNotes'));
 		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
 		$response = $this->controller->index();
@@ -54,63 +76,24 @@ class NotesControllerTest extends ControllerTestUtility {
 		$this->assertEquals('notes/index', $response->getTemplateName());
 	}
 
-	public function testIndexSharedNoReadPerm() {
+	/**
+	 * @dataProvider noProjectOrPermissions
+	 */
+	public function testShowNoProjectOrNoReadPerm($project) {
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects'));
-		$mockSharedProject = new Project (array('id'=>123, 'uid'=>'Bar'), 'Foo', 0);
-		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($mockSharedProject));
-		$noteMapper = $this->getMock('NoteMapper', array('getNotes'));
-		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
-		$response = $this->controller->index();
-		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
-		$this->assertEquals('index.php/apps/projects', $response->getRedirectUrl());
-	}
-
-	public function testIndexSharedWithReadPerm() {
-		$mockSharedProject = new Project (array('id'=>123, 'uid'=>'Bar'), 'Foo', 1);
-		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($mockSharedProject));
-		$noteMapper = $this->getMock('NoteMapper', array('getNotes'));
-		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
-		$response = $this->controller->index();
-		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response );
-		$this->assertEquals('notes/index', $response->getTemplateName());
-	}
-
-	public function testShowNoProjectOrNoReadPerm() {
-		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects'));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
 		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
 		$response = $this->controller->show();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
 		$this->assertEquals('index.php/apps/projects', $response->getRedirectUrl());
 	}
 
-	public function testShowUserProjectNoNote() {
+	/**
+	 * @dataProvider userOrSharedProject
+	 */
+	public function testShowUserOrSharedProjectNoNote($project) {
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects/project/123/notes'));
-		$mockProject = new Project (array('id'=>123, 'uid'=>'Foo'), 'Foo');
-		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($mockProject));
-		$noteMapper = $this->getMock('NoteMapper', array('getNote'));
-		$noteMapper->expects($this->once())->method('getNote')->will($this->returnValue(null));
-		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
-		$response = $this->controller->show();
-		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
-		$this->assertEquals('index.php/apps/projects/project/123/notes', $response->getRedirectUrl());
-	}
-
-	public function testShowUserProjectAndNote() {
-		$mockProject = new Project (array('id'=>123, 'uid'=>'Foo'), 'Foo');
-		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($mockProject));
-		$noteMapper = $this->getMock('NoteMapper', array('getNote'));
-		$mockNote = new Note();
-		$noteMapper->expects($this->once())->method('getNote')->will($this->returnValue($mockNote));
-		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
-		$response = $this->controller->show();
-		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response );
-		$this->assertEquals('notes/show', $response->getTemplateName());
-	}
-
-	public function testShowSharedProjectNoNote() {
-		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects/project/123/notes'));
-		$mockSharedProject = new Project (array('id'=>123, 'uid'=>'Bar'), 'Foo', 1);
-		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($mockSharedProject));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
 		$noteMapper = $this->getMock('NoteMapper', array('getNote'));
 		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
 		$response = $this->controller->show();
@@ -118,42 +101,144 @@ class NotesControllerTest extends ControllerTestUtility {
 		$this->assertEquals('index.php/apps/projects/project/123/notes', $response->getRedirectUrl());
 	}
 
-	public function testShowSharedProjectAndNote() {
-		$mockSharedProject = new Project (array('id'=>123, 'uid'=>'Bar'), 'Foo', 1);
-		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($mockSharedProject));
+	/**
+	 * @dataProvider userOrSharedProject
+	 */
+	public function testShowUserOrSharedProjectWithNote($project) {
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
 		$noteMapper = $this->getMock('NoteMapper', array('getNote'));
-		$mockNote = new Note();
-		$noteMapper->expects($this->once())->method('getNote')->will($this->returnValue($mockNote));
+		$noteMapper->expects($this->once())->method('getNote')->will($this->returnValue($this->mockNote));
 		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
 		$response = $this->controller->show();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response );
 		$this->assertEquals('notes/show', $response->getTemplateName());
 	}
 
-	public function testCreateNoProjectOrCreatePerm() {
+	/**
+	 * @dataProvider noProjectOrPermissions
+	 */
+	public function testCreateNoProjectOrCreatePerm($project) {
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects'));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
 		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
 		$response = $this->controller->create();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
 		$this->assertEquals('index.php/apps/projects', $response->getRedirectUrl());
 	}
 
-	public function testCreateUserProject() {
-		$mockProject = new Project (array('id'=>123, 'uid'=>'Foo'), 'Foo');
-		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($mockProject));
+	/**
+	 * @dataProvider userOrSharedProject
+	 */
+	public function testCreateUserOrSharedProject($project) {
+		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects/123/notes/62'));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
 		$noteMapper = $this->getMock('NoteMapper', array('insert'));
+		$noteMapper->expects($this->once())->method('insert')->will($this->returnValue($this->mockNote));
 		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
 		$response = $this->controller->create();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
+		$this->assertEquals('index.php/apps/projects/123/notes/62', $response->getRedirectUrl());
+	}
+
+	/**
+	 * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Request data not set
+	 */
+	public function testNoteFromRequest() {
+		$this->controller->noteFromRequest();
+	}
+	
+	public function testNoteFromRequestReturnsNote() {
+		$mockProject = new Project (array('id'=>123, 'uid'=>'Foo'), 'Foo');
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($mockProject));
+		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
+		$response = $this->controller->noteFromRequest(array('note'=>'blah blah blah'));
+		$this->assertInstanceOf('\OCA\Projects\Db\Note', $response);
+		$this->assertEquals($response->getNote(), 'blah blah blah');
+	}
+	
+	/**
+	 * @dataProvider noProjectOrPermissions
+	 */
+	public function testUpdateNoProjectOrNoUpdatePerm($project) {
+		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects'));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
+		$response = $this->controller->update();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
+		$this->assertEquals('index.php/apps/projects', $response->getRedirectUrl());
+	}
+	
+	/**
+	 * @dataProvider userOrSharedProject
+	 */
+	public function testUpdateUserOrSharedProjectNoNote($project) {
+		$this->request = new Request(array('get'=>array('id'=>123), 'post'=>array('noteId'=>10, 'note'=>'updated text for the note')));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$noteMapper = $this->getMock('NoteMapper', array('getNote', 'insert'));
+		$noteMapper->expects($this->once())->method('insert')->will($this->returnValue($this->mockNote));
+		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
+		$response = $this->controller->update();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response );
-		$this->assertEquals('notes/index', $response->getTemplateName());
+		$this->assertEquals('notes/show', $response->getTemplateName());
+	}
+	
+	/**
+	 * @dataProvider userOrSharedProject
+	 */
+	public function testUpdateUserOrSharedProjectAndNote($project) {
+		$this->request = new Request(array('get'=>array('id'=>123), 'post'=>array('noteId'=>10, 'note'=>'updated text for the note')));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$noteMapper = $this->getMock('NoteMapper', array('getNote', 'update'));
+		$updatedNote = new Note(array('id'=>10, 'projectId'=>123, 'note'=>'updated text for the note'));
+		$noteMapper->expects($this->once())->method('getNote')->will($this->returnValue($this->mockNote));
+		$noteMapper->expects($this->once())->method('update')->will($this->returnValue($updatedNote));
+		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
+		$response = $this->controller->update();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response );
+		$this->assertEquals('notes/show', $response->getTemplateName());
+	}
+		
+	/**
+	 * @dataProvider noProjectOrPermissions
+	 */
+	public function testDestroyNoProjectOrDeletePerm($project) {
+		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects'));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
+		$response = $this->controller->destroy();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
+		$this->assertEquals('index.php/apps/projects', $response->getRedirectUrl());
+	}
+	
+	/**
+	 * @dataProvider userOrSharedProject
+	 */
+	public function testDestroyUserOrSharedProjectNoNote($project) {
+		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects/123/notes'));
+		$this->request = new Request(array('get'=>array('id'=>123), 'post'=>array('noteId'=>10, 'note'=>'updated text for the note')));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$noteMapper = $this->getMock('NoteMapper', array('getNote', 'delete'));
+		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
+		$response = $this->controller->destroy();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
+		$this->assertEquals('index.php/apps/projects/123/notes', $response->getRedirectUrl());
 	}
 
-	public function testCreateSharedNoCreatePerm() {
-		
+	/**
+	 * @dataProvider userOrSharedProject
+	 */
+	public function testDestroyUserOrSharedProjectAndNote($project) {
+		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects/123/notes'));
+		$this->request = new Request(array('get'=>array('id'=>123), 'post'=>array('noteId'=>10, 'note'=>'updated text for the note')));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$noteMapper = $this->getMock('NoteMapper', array('getNote', 'delete'));
+		$noteMapper->expects($this->once())->method('getNote')->will($this->returnValue($this->mockNote));
+		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
+		$response = $this->controller->destroy();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
+		$this->assertEquals('index.php/apps/projects/123/notes', $response->getRedirectUrl());
 	}
 
-	public function testCreateSharedAndCreatePerm() {
-		
-	}
 
 }

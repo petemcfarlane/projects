@@ -28,13 +28,11 @@ class NoteMapper extends Mapper {
         $notes = $this->findAllRows($sql, array($projectId));
         return $notes;
 	}
-/*	
-	public function getDetail($projectId, $detailKey) {
-		$sql = 'SELECT * FROM `' . $this->getTableName() . '` WHERE `project_id` = ? AND `detail_key` = ?';
-		$params = array($projectId, $detailKey);
-		$result = $this->execute($sql, $params);
+
+	public function getNote($id) {
+		$sql = 'SELECT * FROM `' . $this->getTableName() . '` WHERE `id` = ?';
+		$result = $this->execute($sql, array($id) );
 		$row = $result->fetchRow();
-		if ($row) return new Detail($row);
+		return ($row === null || $row === false) ? null : new Note($row);
 	}
-*/
 }

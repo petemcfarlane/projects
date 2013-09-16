@@ -297,4 +297,56 @@
 }
 #content .detail {
     padding: 1em 0;
-  }
+}
+
+
+#content .paper {
+	font: normal 12px/1.5 "Lucida Grande", arial, sans-serif;
+	padding: 6px 5px 4px 42px;
+	position: relative;
+	color: #444;
+	line-height: 20px;
+	border: 1px solid #d2d2d2;
+	background: #fff;
+	background: -webkit-gradient(linear, 0 0, 0 100%, from(#d9eaf3), color-stop(4%, #fff)) 0 4px;
+	background: -webkit-linear-gradient(top, #d9eaf3 0%, #fff 8%) 0 4px;
+	background: -moz-linear-gradient(top, #d9eaf3 0%, #fff 8%) 0 4px;
+	background: -ms-linear-gradient(top, #d9eaf3 0%, #fff 8%) 0 4px;
+	background: -o-linear-gradient(top, #d9eaf3 0%, #fff 8%) 0 4px;
+	background: linear-gradient(top, #d9eaf3 0%, #fff 8%) 0 4px;
+	-webkit-background-size: 100% 20px;
+	-moz-background-size: 100% 20px;
+	-ms-background-size: 100% 20px;
+	-o-background-size: 100% 20px;
+	background-size: 100% 20px;
+	border-radius: 3px;
+	box-shadow: 0 1px 2px rgba(0,0,0,.1);
+	min-height: 150px;
+	margin-bottom: 1em;
+}
+
+#content .paper::before {
+	content: '';
+	position: absolute;
+	width: 4px;
+	top: 0;
+	left: 30px;
+	bottom: 0;
+	border: 1px solid;
+	border-color: transparent #efe4e4;
+}
+
+
+#content .paper textarea {
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	border: none;
+	outline: none;
+	background: transparent;
+	line-height: 20px;
+	box-shadow: none;
+	border-radius: 0;
+	resize: none;
+}
