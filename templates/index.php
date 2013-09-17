@@ -1,10 +1,20 @@
 <div class="row">
-	<div class="columns small-6">
+	<div class="columns large-12 center">
 		<h1>Projects</h1>
+		<a class="button menu-right" id="show-new-project-form">New</a>
 	</div>
-	<div class="columns small-6">
-		<a class="button right" href="{{ url('projects.project.newForm') }}">Add Project</a>
-	</div>
+</div>
+<div class="row border-top hide">
+	<form action="{{ url('projects.project.create') }}" method="post" id="create-project">
+		<input type="hidden" name="requesttoken" value="{{ requesttoken }}" />
+		<div class="columns large-8">
+			<input type="text" name="projectName" id="projectName" placeholder="Enter a project name" autocomplete="off" />
+		</div>
+		<div class="columns large-4">
+			<a id="cancel-new-project" class="button right">Cancel</a>
+			<input type="submit" value="Create Project" class="button right" />
+		</div>
+	</form>
 </div>
 {% if projects %}
 	{% for project in projects %}
@@ -12,10 +22,10 @@
 			<div class="columns large-12">
 				<h2 class="project-name"><a href="{{ url('projects.project.show', {'id':project.id}) }}">{{ project.projectName }}</a></h2>
 				<span class="project-links">
-					<a href="">Tasks</a>
+					<!-- <a href="">Tasks</a> -->
 					<a href="{{ url('projects.detail.index', {'id':project.id}) }}">Details</a>
 					<a href="{{ url('projects.notes.index', {'id':project.id}) }}">Notes</a>
-					<a href="">Meetings</a>
+					<!-- <a href="">Meetings</a> -->
 					<a class="share" data-item-type="projects" data-item="{{ project.id }}" data-possible-permissions="31" data-private-link="false" data-link"true">Share</a>
 				</span>
 			</div>

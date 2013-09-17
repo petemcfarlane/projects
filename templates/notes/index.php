@@ -1,27 +1,24 @@
 <div class="row">
-	<div class="columns small-12">
+	<div class="columns large-12 center">
 		<h1>Notes for {{ projectName }}</h1>
+		<a href="{{ url('projects.project.index') }}" class="button menu-left">&lt; Projects</a>
+		<a href="{{ url('projects.notes.newNote', {'id':id}) }}" class="button menu-right">New</a>
 	</div>
 </div>
 {% if notes %}
 	{% set i = 1 %}
+	{% set totalNotes = notes|length %}
 	<div class="row">
 		{% for note in notes %}
 			<div class="columns large-4">
-				<article class="note paper">
-					<a href="{{ url('projects.notes.show', {'id':id, 'noteId':note.id}) }}">
-						{{ note.note }}
-					</a>
-				</article>
+				<a href="{{ url('projects.notes.show', {'id':id, 'noteId':note.id}) }}" class="no-underline">
+					<article class="note paper fade-bottom height-240">
+						{{ note.note|raw }}
+					</article>
+				</a>
 			</div>
-			{% if i % 3 == 0 %}</div><div class="row">{% endif %}
+			{% if i % 3 == 0 and i != totalNotes %}</div><div class="row">{% endif %}
 			{% set i=i+1 %}
 		{% endfor %}
 	</div>
 {% endif %}
-
-<form method="post" action="{{ url('projects.notes.create', {'id':id	}) }}">
-	<input type="hidden" name="requesttoken" value="{{ requesttoken }}" />
-	<textarea name="note"></textarea>
-	<input type="submit" value="Save" />
-</form>

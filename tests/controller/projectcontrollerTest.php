@@ -39,10 +39,7 @@ class ProjectControllerTest extends ControllerTestUtility {
 	public function testAnnotations() {
 		$annotations = array('IsAdminExemption', 'IsSubAdminExemption', 'CSRFExemption');
 		$this->assertAnnotations($this->controller, 'index', $annotations);
-		$this->assertAnnotations($this->controller, 'newForm', $annotations);
 		$this->assertAnnotations($this->controller, 'show', $annotations);
-		$this->assertAnnotations($this->controller, 'edit', $annotations);
-		$this->assertAnnotations($this->controller, 'delete', $annotations);
 		$annotations = array('IsAdminExemption', 'IsSubAdminExemption');
 		$this->assertAnnotations($this->controller, 'create', $annotations);
 		$this->assertAnnotations($this->controller, 'update', $annotations);
@@ -102,12 +99,6 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->getProjects('Foo');
 		$this->assertEquals(array_merge($mockUserProjects, $mockSharedProjects), $response);
-	}
-	
-	public function testNewProjectForm() {
-		$response = $this->controller->newForm();
-		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response);
-		$this->assertEquals('new', $response->getTemplateName());
 	}
 
 	public function testCreateReturnsCorrectTemplateResponse() {
@@ -207,54 +198,6 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->assertEquals('show', $response->getTemplateName());
 	}
 
-	public function testEditProjectDoesNotExist() {
-		$this->request = new Request(array('get'=>array('id'=>999)));
-		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
-		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
-		$response = $this->controller->edit();
-		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
-		$this->assertEquals('index.php/projects/', $response->getRedirectURL());
-	}
-
-	public function testEditProjectByUser() {
-		$mockProject = new Project (array('id'=>999, 'uid'=>'Foo'), 'Foo');
-		$this->request = new Request(array('get'=>array('id'=>999)));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject'));
-		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue($mockProject));
-		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
-		$response = $this->controller->edit();
-		$this->assertInstanceOf('OCA\AppFramework\Http\TemplateResponse', $response);
-		$this->assertEquals('edit', $response->getTemplateName());
-	}
-	
-	public function testEditProjectIsSharedButUserDoesNotHaveUpdatePerm() {
-		$this->request = new Request(array('get'=>array('id'=>999)));
-		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
-		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
-		$mockSharedProject = new Project (array('id'=>999, 'uid'=>'Bar'), 'Foo', '17');
-		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
-		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
-		$response = $this->controller->edit();
-		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
-		$this->assertEquals('index.php/projects/', $response->getRedirectURL());
-	}
-
-	public function testEditProjectIsSharedAndUserHasUpdatePerm() {
-		$this->request = new Request(array('get'=>array('id'=>999)));
-		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
-		$mockSharedProject = new Project (array('id'=>999, 'uid'=>'Bar'), 'Foo', '31');
-		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
-		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
-		$response = $this->controller->edit();
-		$this->assertInstanceOf('OCA\AppFramework\Http\TemplateResponse', $response);
-		$this->assertEquals('edit', $response->getTemplateName());
-	}
-
 	public function testUpdateProjectDoesNotExist() {
 		$this->request = new Request(array('post'=>array('id'=>999)));
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
@@ -307,55 +250,6 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$response = $this->controller->update();
 		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
 		$this->assertEquals('index.php/projects/project/999', $response->getRedirectURL());
-	}
-
-	public function testDeleteProjectDoesNotExist() {
-		$this->request = new Request(array('get'=>array('id'=>999)));
-		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
-		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
-		$response = $this->controller->delete();
-		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
-		$this->assertEquals('index.php/projects/', $response->getRedirectURL());
-	}
-
-	public function testDeleteProjectByUser() {
-		$mockProject = new Project (array('id'=>999, 'uid'=>'Foo'), 'Foo');
-		$this->request = new Request(array('get'=>array('id'=>999)));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject'));
-		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue($mockProject));
-		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
-		$response = $this->controller->delete();
-		$this->assertInstanceOf('OCA\AppFramework\Http\TemplateResponse', $response);
-		$this->assertEquals('delete', $response->getTemplateName());
-	}
-
-	public function testDeleteProjectIsSharedButUserDoesNotHaveDeletePerm() {
-		$this->request = new Request(array('get'=>array('id'=>999)));
-		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/'));
-		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
-		$mockSharedProject = new Project (array('id'=>999, 'uid'=>'Bar'), 'Foo', 1);
-		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
-		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
-		$response = $this->controller->delete();
-		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
-		$this->assertEquals('index.php/projects/', $response->getRedirectURL());
-	}
-
-	public function testDeleteProjectIsSharedAndUserHasDeletePerm() {
-		$this->request = new Request(array('get'=>array('id'=>999)));
-		$mockSharedProject = array('id'=>999, 'uid'=>'Bar', 'permissions'=>array('update','delete'));
-		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
-		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
-		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'findProjectById'));
-		$mockSharedProject = new Project (array('id'=>999, 'uid'=>'Bar'), 'Foo', 31);
-		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
-		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
-		$response = $this->controller->delete();
-		$this->assertInstanceOf('OCA\AppFramework\Http\TemplateResponse', $response);
-		$this->assertEquals('delete', $response->getTemplateName());
 	}
 
 	public function testDestroyProjectDoesNotExist() {

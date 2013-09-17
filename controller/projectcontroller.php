@@ -39,15 +39,6 @@ class ProjectController extends Controller {
 	}
 	
 	/**
-	 * @CSRFExemption
-	 * @IsAdminExemption
-	 * @IsSubAdminExemption
-	 */
-	public function newForm() {
-		return $this->render('new', $this->params, $this->renderas);
-	}
-
-	/**
 	 * @IsAdminExemption
 	 * @IsSubAdminExemption
 	 */
@@ -78,22 +69,22 @@ class ProjectController extends Controller {
 		}
 	}
 
-	/**
-	 * @CSRFExemption
-	 * @IsAdminExemption
-	 * @IsSubAdminExemption
-	 */
-	public function edit() {
-		$project = $this->getProject($this->request->id, $this->api->getUserId());
-		if ( $project && $project->canUpdate() ) {
-			$this->params = array_merge($this->params, (array)$project);
-			return $this->render('edit', $this->params, $this->renderas);
-		} else {
-			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
-			$response->setStatus(303);
-			return $response;
-		}
-	}
+	// /**
+	 // * @CSRFExemption
+	 // * @IsAdminExemption
+	 // * @IsSubAdminExemption
+	 // */
+	// public function edit() {
+		// $project = $this->getProject($this->request->id, $this->api->getUserId());
+		// if ( $project && $project->canUpdate() ) {
+			// $this->params = array_merge($this->params, (array)$project);
+			// return $this->render('edit', $this->params, $this->renderas);
+		// } else {
+			// $response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
+			// $response->setStatus(303);
+			// return $response;
+		// }
+	// }
 
 	/**
 	 * @IsAdminExemption
@@ -116,22 +107,22 @@ class ProjectController extends Controller {
 		return $response;
 	}
 
-	/**
-	 * @CSRFExemption
-	 * @IsAdminExemption
-	 * @IsSubAdminExemption
-	 */
-	public function delete() {
-		$project = $this->getProject($this->request->id, $this->api->getUserId());
-		if ( $project && $project->canDelete() ) {
-			$this->params = array_merge($this->params, (array)$project);
-        	return $this->render('delete', $this->params, $this->renderas);
-		} else {
-			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
-			$response->setStatus(303);
-			return $response;
-		}
-	}
+	// /**
+	 // * @CSRFExemption
+	 // * @IsAdminExemption
+	 // * @IsSubAdminExemption
+	 // */
+	// public function delete() {
+		// $project = $this->getProject($this->request->id, $this->api->getUserId());
+		// if ( $project && $project->canDelete() ) {
+			// $this->params = array_merge($this->params, (array)$project);
+        	// return $this->render('delete', $this->params, $this->renderas);
+		// } else {
+			// $response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
+			// $response->setStatus(303);
+			// return $response;
+		// }
+	// }
 
 	/**
 	 * @IsAdminExemption

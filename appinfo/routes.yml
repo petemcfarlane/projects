@@ -7,38 +7,20 @@ routes:
     url: /
     verb: POST
 
-  - name: project#newForm
-    url: /new
-    verb: GET
-
   - name: project#show
     url: /project/{id}
     verb: GET
 
-  - name: project#edit
-    url: /project/{id}/edit
-    verb: GET
-
   - name: project#update
-    url: /project/{id}/edit
+    url: /project/{id}
     verb: POST
-
-  # - name: project#update
-    # url: /project/{id}
-    # verb: PUT
-
-  - name: project#delete
-    url: /project/{id}/delete
-    verb: GET
 
   - name: project#destroy
     url: /project/{id}/destroy
     verb: POST
 
-  # - name: project#destroy
-    # url: /project/{id}
-    # verb: DELETE
-# 
+
+
   - name: detail#index
     url: /project/{id}/detail
     verb: GET
@@ -47,32 +29,22 @@ routes:
     url: /project/{id}/detail
     verb: POST
 
-  - name: detail#show
-    url: /project/{id}/detail/{detailKey}
-    verb: GET
-
-  # - name: detail#edit
-    # url: /project/{id}/detail/{detailKey}/edit
-    # verb: GET
-
-  # - name: detail#update
-    # url: /project/{id}/detail/{detailKey}
-    # verb: PUT
-
   - name: detail#update
-    url: /project/{id}/detail/{detailKey}/edit
+    url: /project/{id}/detail
     verb: POST
-
-  - name: detail#delete
-    url: /project/{id}/detail/{detailKey}/delete
-    verb: GET
 
   - name: detail#destroy
-    url: /project/{id}/detail/{detailKey}/delete
+    url: /project/{id}/detail/delete
     verb: POST
+
+
 
   - name: notes#index
     url: /project/{id}/notes
+    verb: GET
+
+  - name: notes#newNote
+    url: /project/{id}/notes/new
     verb: GET
 
   - name: notes#create
@@ -90,9 +62,3 @@ routes:
   - name: notes#destroy
     url: /project/{id}/notes/{noteId}/delete
     verb: POST
-
-
-#resources:
-#    project:
-#      url: /project
-#      params: key

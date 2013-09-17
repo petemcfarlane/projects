@@ -46,6 +46,7 @@ class NotesControllerTest extends ControllerTestUtility {
 		$loggedInCSRF = array('IsAdminExemption', 'IsSubAdminExemption', 'CSRFExemption');
 		$this->assertAnnotations($this->controller, 'index', $loggedInCSRF);
 		$this->assertAnnotations($this->controller, 'show', $loggedInCSRF);
+		$this->assertAnnotations($this->controller, 'newNote', $loggedInCSRF);
 		$this->assertAnnotations($this->controller, 'create', $loggedIn);
 		$this->assertAnnotations($this->controller, 'update', $loggedIn);
 		$this->assertAnnotations($this->controller, 'destroy', $loggedIn);
@@ -112,6 +113,30 @@ class NotesControllerTest extends ControllerTestUtility {
 		$response = $this->controller->show();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response );
 		$this->assertEquals('notes/show', $response->getTemplateName());
+	}
+
+	/**
+	 * @dataProvider noProjectOrPermissions
+	 */
+	public function testNewNoteNoProjectOrCreatePerm($project) {
+		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects'));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$noteMapper = $this->getMock('NoteMapper', array('getNotes'));
+		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
+		$response = $this->controller->newNote();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
+		$this->assertEquals('index.php/apps/projects', $response->getRedirectUrl());
+	}
+
+	/**
+	 * @dataProvider userOrSharedProject
+	 */
+	public function testNewNoteUserOrSharedProject($project) {
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
+		$response = $this->controller->newNote();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response );
+		$this->assertEquals('notes/new', $response->getTemplateName());
 	}
 
 	/**

@@ -73,6 +73,17 @@ class NotesController extends Controller {
 	}
 	
 	/**
+	 * @CSRFExemption
+	 * @IsAdminExemption
+	 * @IsSubAdminExemption
+	 */
+	public function newNote() {
+		if (!$this->project || !$this->project->canCreate() ) return $this->redirectProjectsIndex();
+		$this->params = array_merge($this->params, (array)$this->project);
+		return $this->render('notes/new', $this->params, $this->renderas);
+	}
+	
+	/**
 	 * @IsAdminExemption
 	 * @IsSubAdminExemption
 	 */

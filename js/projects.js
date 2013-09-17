@@ -1,5 +1,10 @@
 $(document).ready(function () {
 	
+	// call init() when the document is ready - for every direct load.
+	// It must also be called after every pjax request
+	
+	init(); 
+
 	/* ------------------------
 	 * PJAX
 	 * -----------------------*/
@@ -10,17 +15,34 @@ $(document).ready(function () {
 		$(document).on('submit', '#content form', function(e) {
 			$.pjax.submit(e, '#content');
 		});
+		
+		$('#content').on('pjax:end', init );
 	}
 	
-    // $('.project-name').click(function(){
-        // $(this).parent().find('.block').slideToggle('fast');
-    // });
-	
-    /*
-     * Automatically resize textarea inputs
-     */
+});
+
+function init() {
+
+	/* ------------------------
+	 * Projects
+	 * -----------------------*/
+
+	$('#show-new-project-form').on('click', function() {
+		$(this).fadeOut();
+		$('#create-project').parent().slideDown();
+		$('#projectName').focus();
+		$('#cancel-new-project').on('click', function() {
+			$('#projectName').val('');
+			$('#create-project').parent().slideUp();
+			$('#show-new-project-form').fadeIn();
+		});
+	});
+
+	/* ------------------------
+	 * Details
+	 * -----------------------*/
     
-    $('textarea.illusion').autosize();
+    $('.illusion').autosize();
 
     $('#new-detail-value').autosize();
 
@@ -50,12 +72,21 @@ $(document).ready(function () {
     
     $.each( $('input.detail-key'), function(i, item) {
         $("#select-add-field option[value='"+item.value+"']").remove();
-        // console.log(item.value);
     });
-    
-    /*
-     * Notes
-     */
-    $('.paper textarea').autosize();
 
-});
+	/* ------------------------
+	 * Notes
+	 * -----------------------*/
+
+    $('.paper textarea').autosize();
+    $('#edit-note, #new-note').submit(function(e) {
+    	e.preventDefault();
+    	$('#save-note').val('Saving...');
+    	$('#note-input').val($('#note-content').html());
+    });
+    $('#new-note').find('article').focus();
+    $('#note-content').one('keyup', function() {
+    	$('.note-status').text('Unsaved changes');
+    	$('#save-note').show();
+    });
+}

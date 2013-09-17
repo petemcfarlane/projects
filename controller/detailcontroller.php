@@ -22,9 +22,8 @@ class DetailController extends Controller {
 	public function __construct(API $api, Request $request, $detailMapper=null, $projectController=null) {
 		parent::__construct($api, $request);
 		$this->params = array('requesttoken' => \OC_Util::callRegister() );
+		$this->params['image']['delete'] = $this->api->imagePath('actions/delete.svg');
 		$this->renderas = isset($_SERVER['HTTP_X_PJAX']) ? '' : 'user';
-		// $this->api->addStyle('projects');
-		// $this->api->addScript('projects');
 		$this->detailMapper = $detailMapper===null ? new DetailMapper($this->api) : $detailMapper;
 		$projectController = $projectController===null ? new ProjectController($this->api, $this->request) : $projectController;
 		$this->project = (array)$projectController->getProject($this->request->id, $this->api->getUserId());
@@ -144,23 +143,6 @@ class DetailController extends Controller {
 			$response = new RedirectResponse( $this->api->linkToRoute('projects.detail.index', array('id'=>$this->project['id']) ) );
 			$response->setStatus(303);
 			return $response;
-		} else {
-			return new JSONResponse( array('error'=>'You do not have permissions to update details for this project'), 403);
-		}
-	}
-	
-	/**
-	 * @CSRFExemption
-	 * @IsAdminExemption
-	 * @IsSubAdminExemption
-	 */
-	public function delete() {
-		if (!($this->project)) throw new \InvalidArgumentException("Project Id not set");
-		if (!($this->request->detailKey)) throw new \InvalidArgumentException("Detail Key not set");
-		if ( $this->canDelete($this->project) && $detail=$this->getDetail($this->project['id'], $this->request->detailKey)) {
-			$this->params = array_merge($this->params, (array)$this->project);
-			$this->params['detail'] = (array)$detail;
-			return $this->render('detail/delete', $this->params, $this->renderas);
 		} else {
 			return new JSONResponse( array('error'=>'You do not have permissions to update details for this project'), 403);
 		}

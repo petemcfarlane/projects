@@ -1,31 +1,42 @@
 <div class="row">
-	<div class="columns small-12">
+	<div class="columns small-12 center">
 		<h1>{{ projectName }} Details</h1>
+		<a href="{{ url('projects.project.index') }}" class="button menu-left">&lt; Projects</a>
 	</div>
 </div>
 {% if details %}
 	{% for detail in details %}
-		<div class="row detail border-bottom">
-			<form method="post" action="{{ url('projects.detail.update', {'id':id, 'detailKey':detail.detailKey}) }}">
-				<input type="hidden" name="requesttoken" value="{{ requesttoken }}" />
-				<div class="columns large-2 detail-key large-align-right">{{ detail.detailKey }}<input type="hidden" name="detailKey" class="detail-key" value="{{ detail.detailKey }}"/></div>
-				<div class="columns large-10 detail-value">
-					<div class="row">
-						<div class="columns large-9"><textarea name="detailValue" class="illusion">{{ detail.detailValue }}</textarea></div>
-						<div class="columns large-3 align-right">
-							<input type="submit" value="Update" class="save-field" />
-							</form>
-							<form class="inline" method="post" action="{{ url('projects.detail.destroy', {'id':id, 'detailKey':detail.detailKey}) }}">
-								<input type="hidden" name="requesttoken" value="{{ requesttoken }}" />
-								<button type="submit" title="Delete" class="btn-action"><img class="icon-delete" src="/core/img/actions/delete.svg" /></button>
+		<div class="row detail border-top">
+			<div class="columns large-2 detail-key large-align-right">{{ detail.detailKey }}</div>
+			<div class="columns large-10 detail-value">
+				<div class="row">
+					<div class="columns small-11">
+						<div class="row">
+							<form method="post" action="{{ url('projects.detail.update', {'id':id}) }}">
+								<div class="columns large-10">
+									<input type="hidden" name="requesttoken" value="{{ requesttoken }}" />
+									<input type="hidden" name="detailKey" value="{{ detail.detailKey }}" class="detail-key"/>
+									<textarea name="detailValue" class="illusion">{{ detail.detailValue }}</textarea>
+								</div>
+								<div class="columns large-2">
+									<input type="submit" value="Update" class="save-field button" />
+								</div>
 							</form>
 						</div>
 					</div>
+					<div class="columns small-1">
+						<form class="inline" method="post" action="{{ url('projects.detail.destroy', {'id':id}) }}">
+							<input type="hidden" name="requesttoken" value="{{ requesttoken }}" />
+							<input type="hidden" name="detailKey" value="{{ detail.detailKey }}" />
+							<button type="submit" title="Delete" class="btn-action"><img class="icon-delete" src="{{ image.delete }}" alt="delete" /></button>
+						</form>
+					</div>
 				</div>
+			</div>
 		</div>
 	{% endfor %}
 {% endif %}
-<div class="row">
+<div class="row border-top">
 	<div class="columns large-10 right">
 		<select id="select-add-field" class="margin-top-bottom">
 			<option>Add field</option>
@@ -69,8 +80,7 @@
 		<div class="columns large-10">
 			<div class="row">
 				<div class="columns large-9"><textarea name="detailValue" id="new-detail-value" class="gray-border-box" ></textarea></div>
-				<div class="columns large-3 align-right">
-				<input type="submit" value="Add detail" id="add-detail-submit" />
+				<div class="columns large-3 align-right"><input type="submit" class="button" value="Add detail" id="add-detail-submit" /></div>
 			</div>
 		</div>
 	</form>
