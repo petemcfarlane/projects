@@ -62,3 +62,21 @@ routes:
   - name: notes#destroy
     url: /project/{id}/notes/{noteId}/delete
     verb: POST
+
+
+  - name: task#index
+    url: /project/{id}/tasks
+    verb: GET
+
+  - name: task#create
+    url: /project/{id}/tasks
+    verb: POST
+
+  - name: task#update
+    url: /project/{id}/tasks/{taskId}
+    verb: POST
+
+  - name: task#destroy
+    url: /project/{id}/tasks/{taskId}/delete
+    verb: POST
+
