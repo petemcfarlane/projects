@@ -4,7 +4,7 @@
 		<a href="{{ url('projects.project.index') }}" class="button menu-left">&lt; Projects</a>
 	</div>
 </div>
-<div class="row">
+<div class="row border-top">
 	<div class="columns large-6">
 		<form method="post" action="{{ url('projects.project.update', {'id':id} ) }}">
 			<input type="hidden" name="requesttoken" value="{{ requesttoken }}" />
