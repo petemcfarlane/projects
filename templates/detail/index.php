@@ -1,21 +1,20 @@
 <div class="row">
 	<div class="columns small-12 center">
 		<h1>{{ projectName }} Details</h1>
-		<a href="{{ url('projects.project.index') }}" class="button menu-left">&lt; Projects</a>
+		<a href="{{ url('projects.project.show', {'id':id}) }}" class="button menu-left">&lt; Project</a>
 	</div>
 </div>
 {% if details %}
 	{% for detail in details %}
 		<div class="row detail border-top">
-			<div class="columns large-2 detail-key large-align-right">{{ detail.detailKey }}</div>
+			<div class="columns large-2 detail-key large-align-right" data-detailKey="{{ detail.detailKey }}">{{ detail.detailKey }}</div>
 			<div class="columns large-10 detail-value">
 				<div class="row">
 					<div class="columns small-11">
 						<div class="row">
-							<form method="post" action="{{ url('projects.detail.update', {'id':id}) }}">
+							<form method="post" action="{{ url('projects.detail.update', {'id':id, 'detailId':detail.id}) }}">
 								<div class="columns large-10">
 									<input type="hidden" name="requesttoken" value="{{ requesttoken }}" />
-									<input type="hidden" name="detailKey" value="{{ detail.detailKey }}" class="detail-key"/>
 									<textarea name="detailValue" class="illusion">{{ detail.detailValue }}</textarea>
 								</div>
 								<div class="columns large-2">
@@ -25,7 +24,7 @@
 						</div>
 					</div>
 					<div class="columns small-1">
-						<form class="inline" method="post" action="{{ url('projects.detail.destroy', {'id':id}) }}">
+						<form class="inline" method="post" action="{{ url('projects.detail.destroy', {'id':id, 'detailId':detail.id}) }}">
 							<input type="hidden" name="requesttoken" value="{{ requesttoken }}" />
 							<input type="hidden" name="detailKey" value="{{ detail.detailKey }}" />
 							<button type="submit" title="Delete" class="btn-action"><img class="icon-delete" src="{{ image.delete }}" alt="delete" /></button>

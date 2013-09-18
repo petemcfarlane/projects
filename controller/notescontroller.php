@@ -7,9 +7,7 @@ use \OCA\Projects\Core\API;
 use \OCA\AppFramework\Http\Request;
 use \OCA\Projects\Db\NoteMapper;
 use \OCA\Projects\Controller\ProjectController;
-// use \OCA\AppFramework\Http\TemplateResponse;
 use \OCA\AppFramework\Http\RedirectResponse;
-// use \OCA\AppFramework\Http\JSONResponse;
 use \OCA\Projects\Db\Note;
 
 class NotesController extends Controller {
@@ -52,7 +50,7 @@ class NotesController extends Controller {
 		if (!$this->project || !$this->project->canRead() ) return $this->redirectProjectsIndex();
 		$this->params = array_merge($this->params, (array)$this->project);
 		$this->params['notes'] = $this->noteMapper->getNotes( $this->project->getId() );
-		return $this->render('notes/index', $this->params, $this->renderas,  array('X-PJAX-URL'=>$this->api->linkToRoute('projects.notes.index', array('id'=>$this->project->getId()))));
+		return $this->render('notes/index', $this->params, $this->renderas, array('X-PJAX-URL'=>$this->api->linkToRoute('projects.notes.index', array('id'=>$this->project->getId()))));
 	}
 
 	/**
@@ -62,6 +60,7 @@ class NotesController extends Controller {
 	 */
 	public function show() {
 		if (!$this->project || !$this->project->canRead() ) return $this->redirectProjectsIndex();
+		if (!($this->request->noteId)) throw new \InvalidArgumentException("noteId not set");
 		if ( $note = $this->noteMapper->getNote($this->request->noteId) ) {
 			$this->params = array_merge($this->params, (array)$this->project);
 			$this->params['note'] = (array)$note;
@@ -89,6 +88,7 @@ class NotesController extends Controller {
 	 */
 	public function create() {
 		if (!$this->project || !$this->project->canCreate() ) return $this->redirectProjectsIndex();
+		if (!($this->request->note)) throw new \InvalidArgumentException("note not set");
 		$this->params = array_merge($this->params, (array)$this->project);
 		$note = $this->noteFromRequest($this->request);
 		$note = $this->noteMapper->insert($note);
@@ -103,6 +103,8 @@ class NotesController extends Controller {
 	 */
 	public function update() {
 		if (!$this->project || !$this->project->canUpdate() ) return $this->redirectProjectsIndex();
+		if (!($this->request->noteId)) throw new \InvalidArgumentException("noteId not set");
+		if (!($this->request->note)) throw new \InvalidArgumentException("note not set");
 		$this->params = array_merge($this->params, (array)$this->project);
 		if ( $note = $this->noteMapper->getNote($this->request->noteId) ) {
 			$note->setNote($this->request->note);
@@ -121,6 +123,7 @@ class NotesController extends Controller {
 	 */
 	public function destroy() {
 		if (!$this->project || !$this->project->canDelete() ) return $this->redirectProjectsIndex();
+		if (!($this->request->noteId)) throw new \InvalidArgumentException("noteId not set");
 		$note = $this->noteMapper->getNote($this->request->noteId);
 		if ($note) $this->noteMapper->delete($note);
 		$response = new RedirectResponse( $this->api->linkToRoute('projects.notes.index', array('id'=>$this->project->getId())) );

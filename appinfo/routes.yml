@@ -30,11 +30,11 @@ routes:
     verb: POST
 
   - name: detail#update
-    url: /project/{id}/detail
+    url: /project/{id}/detail/{detailId}
     verb: POST
 
   - name: detail#destroy
-    url: /project/{id}/detail/delete
+    url: /project/{id}/detail/{detailId}/delete
     verb: POST
 
 

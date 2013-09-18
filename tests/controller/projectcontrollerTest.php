@@ -2,11 +2,9 @@
 namespace OCA\Projects\Controller;
 
 use \OCA\AppFramework\Http\Request;
-use \OCA\AppFramework\Http\TemplateResponse;
 use \OCA\AppFramework\Http\RedirectResponse;
 use \OCA\AppFramework\Utility\ControllerTestUtility;
 use \OCA\Projects\Db\Project;
-use \OCA\Projects\Db\ProjectMapper;
 require_once(__DIR__ . "/../classloader.php");
 
 class ProjectControllerTest extends ControllerTestUtility {
@@ -211,14 +209,13 @@ class ProjectControllerTest extends ControllerTestUtility {
 	public function testUpdateProjectByUser() {
 		$mockProject = new Project( array('id'=>999, 'uid'=>'Foo', 'projectName'=>'ACME'), 'Foo' );
 		$this->request = new Request(array('post'=>array('id'=>999, 'projectName'=>'technologique')));
-		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/project/999'));
 		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'update'));
 		$projectMapper->expects($this->once())->method('update')->will($this->returnValue($mockProject));
 		$projectMapper->expects($this->once())->method('getProject')->will($this->returnValue($mockProject));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->update();
-		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
-		$this->assertEquals('index.php/projects/project/999', $response->getRedirectURL());
+		$this->assertInstanceOf('OCA\AppFramework\Http\TemplateResponse', $response);
+		$this->assertEquals('show', $response->getTemplateName());
 	}
 
 	public function testUpdateProjectIsSharedButUserDoesNotHaveUpdatePerm() {
@@ -241,15 +238,14 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->request = new Request(array('post'=>array('id'=>999, 'projectName'=>'technologique', 'permissions'=>array('update'))));
 		$share = array('id'=>123, 'item_source'=>42, 'permissions'=>17);
 		$this->api->expects($this->once())->method('getItemSharedWith')->will($this->returnValue($share));
-		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/projects/project/999'));
 		$projectMapper = $this->getMock('ProjectMapper', array('getProject', 'update', 'findProjectById'));
 		$projectMapper->expects($this->once())->method('update')->will($this->returnValue($mockSharedProject));
 		$mockSharedProject = new Project (array('id'=>999, 'uid'=>'Bar'), 'Foo', 31);
 		$projectMapper->expects($this->once())->method('findProjectById')->will($this->returnValue($mockSharedProject));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->update();
-		$this->assertInstanceOf('OCA\AppFramework\Http\RedirectResponse', $response);
-		$this->assertEquals('index.php/projects/project/999', $response->getRedirectURL());
+		$this->assertInstanceOf('OCA\AppFramework\Http\TemplateResponse', $response);
+		$this->assertEquals('show', $response->getTemplateName());
 	}
 
 	public function testDestroyProjectDoesNotExist() {

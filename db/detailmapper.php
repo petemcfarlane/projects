@@ -21,19 +21,25 @@ class DetailMapper extends Mapper {
 		return $details;
 	}
 
-	public function getDetails($projectId=null) {
-		if ($projectId===null) throw new \InvalidArgumentException('$projectId must be set');
+	public function getDetails($projectId) {
 		$sql = 'SELECT * FROM `' . $this->getTableName() . '` WHERE `project_id` = ?';
 		$params = array($projectId);
         $details = $this->findAllRows($sql, array($projectId));
         return $details;
 	}
 	
-	public function getDetail($projectId, $detailKey) {
+	public function getDetailFromKey($projectId, $detailKey) {
 		$sql = 'SELECT * FROM `' . $this->getTableName() . '` WHERE `project_id` = ? AND `detail_key` = ?';
 		$params = array($projectId, $detailKey);
 		$result = $this->execute($sql, $params);
 		$row = $result->fetchRow();
-		if ($row) return new Detail($row);
+		return ($row === null || $row === false) ? null : new Detail($row);
+	}
+
+	public function getDetail($id) {
+		$sql = 'SELECT * FROM `' . $this->getTableName() . '` WHERE `id` = ?';
+		$result = $this->execute($sql, array($id) );
+		$row = $result->fetchRow();
+		return ($row === null || $row === false) ? null : new Detail($row);
 	}
 }

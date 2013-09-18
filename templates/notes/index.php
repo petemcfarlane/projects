@@ -1,7 +1,7 @@
 <div class="row">
 	<div class="columns large-12 center">
 		<h1>Notes for {{ projectName }}</h1>
-		<a href="{{ url('projects.project.index') }}" class="button menu-left">&lt; Projects</a>
+		<a href="{{ url('projects.project.show', {'id':id}) }}" class="button menu-left">&lt; Project</a>
 		<a href="{{ url('projects.notes.newNote', {'id':id}) }}" class="button menu-right">New</a>
 	</div>
 </div>

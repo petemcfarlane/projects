@@ -12,6 +12,9 @@
 			<input type="text" name="projectName" value="{{ projectName }}" placeholder="Enter a project name" autocomplete="off" />
 			<input type="submit" value="Save Name" class="button" />
 		</form>
+		<a href="{{ url('projects.detail.index', {'id':id}) }}">Details</a>
+		<a href="{{ url('projects.notes.index', {'id':id}) }}">Notes</a>
+		<a class="share" data-item-type="projects" data-item="{{ id }}" data-possible-permissions="31" data-private-link="false" data-link"true">Share</a>
 		<form method="post" action="{{ url('projects.project.destroy', {'id':id}) }}">
 			<input type="hidden" name="requesttoken" value="{{ requesttoken }}" />
 			<input type="submit" value="Delete Project" class="button" />

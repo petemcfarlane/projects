@@ -70,8 +70,8 @@ function init() {
         }
     });
     
-    $.each( $('input.detail-key'), function(i, item) {
-        $("#select-add-field option[value='"+item.value+"']").remove();
+    $.each( $('.detail-key'), function(i, item) {
+        $("#select-add-field option[value='"+$(item).data('detailkey')+"']").remove();
     });
 
 	/* ------------------------

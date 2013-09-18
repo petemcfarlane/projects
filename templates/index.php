@@ -23,9 +23,9 @@
 				<h2 class="project-name"><a href="{{ url('projects.project.show', {'id':project.id}) }}">{{ project.projectName }}</a></h2>
 				<span class="project-links">
 					<!-- <a href="">Tasks</a> -->
+					<!-- <a href="">Meetings</a> -->
 					<a href="{{ url('projects.detail.index', {'id':project.id}) }}">Details</a>
 					<a href="{{ url('projects.notes.index', {'id':project.id}) }}">Notes</a>
-					<!-- <a href="">Meetings</a> -->
 					<a class="share" data-item-type="projects" data-item="{{ project.id }}" data-possible-permissions="31" data-private-link="false" data-link"true">Share</a>
 				</span>
 			</div>

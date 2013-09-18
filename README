@@ -9,30 +9,23 @@ Routes
 projects
 	index 		/ 						GET
 	create 		/ 						POST
-//	newForm 	/new 					GET
 	show 		/project/{id} 			GET
+	update 		/project/{id}	 		POST
+	destroy 	/project/{id}/delete 	POST
 
-//	edit 		/project/{id}/edit 		GET
-//	update 		/project/{id}/edit 		POST
-//	delete 		/project/{id}/delete 	GET
-//	destroy 	/project/{id}/destroy 	POST
-
-details
+detail
 	index 		/project/{id}/detail 					GET
 	create 		/project/{id}/detail 					POST
-	show 		/project/{id}/detail/{detailKey} 		GET
-	update		/project/{id}/detail					PUT
-	destroy		/project/{id}/detail					DELETE
-	update 		/project/{id}/detail/{detailKey}/edit 	POST
-	delete 		/project/{id}/detail/{detailKey}/delete GET
-	destroy 	/project/{id}/detail/{detailKey}/delete POST
+	update 		/project/{id}/detail/{detailId}		 	POST
+	destroy 	/project/{id}/detail/{detailId}/delete	POST
 
 notes
-	index		/project/{id}/notes				GET
-	create		/project/{id}/notes				POST
-	show		/project/{id}/notes/{noteId}	GET
-	update		/project/{id}/notes				PUT
-	destroy		/project/{id}/notes				DELETE
+	index		/project/{id}/notes					GET
+	create		/project/{id}/notes					POST
+	newNote		/project/{id}/notes/new				GET
+	show		/project/{id}/notes/{noteId}		GET
+	update		/project/{id}/notes/{noteId}		POST
+	destroy		/project/{id}/notes/{noteId}/delete	POST
 
 meetings
 	index

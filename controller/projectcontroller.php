@@ -6,7 +6,6 @@ use \OCA\AppFramework\Controller\Controller;
 use \OCA\AppFramework\Http\TemplateResponse;
 use \OCA\AppFramework\Http\Request;
 use \OCA\AppFramework\Http\RedirectResponse;
-// use \OCA\AppFramework\Http\JSONResponse;
 use \OCA\Projects\Core\API;
 use \OCA\Projects\Db\Project;
 use \OCA\Projects\Db\ProjectMapper;
@@ -28,6 +27,12 @@ class ProjectController extends Controller {
 		$this->projectMapper = $projectMapper===null ? new ProjectMapper($this->api) : $projectMapper;
 	}
 	
+	public function redirectProjectsIndex() {
+		$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
+		$response->setStatus(303);
+		return $response;
+	}
+	
 	/**
 	 * @CSRFExemption
 	 * @IsAdminExemption
@@ -35,8 +40,8 @@ class ProjectController extends Controller {
 	 */
 	public function index() {
 		$this->params = array_merge($this->params, array('projects'=>$this->getProjects($this->api->getUserId())));
-        return $this->render('index', $this->params, $this->renderas);
-	}
+        return $this->render('index', $this->params, $this->renderas, array('X-PJAX-URL'=>$this->api->linkToRoute('projects.project.index')));
+		}
 	
 	/**
 	 * @IsAdminExemption
@@ -59,32 +64,10 @@ class ProjectController extends Controller {
 	 */
 	public function show() {
 		$project = $this->getProject($this->request->id, $this->api->getUserId());
-		if ( $project && $project->canRead() ) {
-			$this->params = array_merge($this->params, (array)$project);
-        	return $this->render('show', $this->params, $this->renderas);
-		} else {
-			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
-			$response->setStatus(303);
-			return $response;
-		}
+		if (!$project || !$project->canRead() ) return $this->redirectProjectsIndex();
+		$this->params = array_merge($this->params, (array)$project);
+    	return $this->render('show', $this->params, $this->renderas);
 	}
-
-	// /**
-	 // * @CSRFExemption
-	 // * @IsAdminExemption
-	 // * @IsSubAdminExemption
-	 // */
-	// public function edit() {
-		// $project = $this->getProject($this->request->id, $this->api->getUserId());
-		// if ( $project && $project->canUpdate() ) {
-			// $this->params = array_merge($this->params, (array)$project);
-			// return $this->render('edit', $this->params, $this->renderas);
-		// } else {
-			// $response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
-			// $response->setStatus(303);
-			// return $response;
-		// }
-	// }
 
 	/**
 	 * @IsAdminExemption
@@ -93,36 +76,15 @@ class ProjectController extends Controller {
 	public function update() {
 		$uid = $this->api->getUserId();
 		$project = $this->getProject($this->request->id, $uid);
-		if ( $project && $project->canUpdate() ) {
-			$project = $this->projectFromRequest($this->request);
-			$project->setId($this->request->id);
-			$project->setUpdatedAt(date("Y-m-d H:i:s"));
-			$project->setModifiedBy($uid);
-			$this->projectMapper->update($project);
-			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.show', array('id'=>$project->getId())) );
-		} else {
-			$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
-		}
-		$response->setStatus(303);
-		return $response;
+		if (!$project || !$project->canUpdate() ) return $this->redirectProjectsIndex();
+		$project = $this->projectFromRequest($this->request);
+		$project->setId($this->request->id);
+		$project->setUpdatedAt(date("Y-m-d H:i:s"));
+		$project->setModifiedBy($uid);
+		$this->projectMapper->update($project);
+		$this->params = array_merge($this->params, (array)$project);
+    	return $this->render('show', $this->params, $this->renderas);
 	}
-
-	// /**
-	 // * @CSRFExemption
-	 // * @IsAdminExemption
-	 // * @IsSubAdminExemption
-	 // */
-	// public function delete() {
-		// $project = $this->getProject($this->request->id, $this->api->getUserId());
-		// if ( $project && $project->canDelete() ) {
-			// $this->params = array_merge($this->params, (array)$project);
-        	// return $this->render('delete', $this->params, $this->renderas);
-		// } else {
-			// $response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
-			// $response->setStatus(303);
-			// return $response;
-		// }
-	// }
 
 	/**
 	 * @IsAdminExemption
@@ -130,12 +92,8 @@ class ProjectController extends Controller {
 	 */
 	public function destroy() {
 		$project = $this->getProject($this->request->id, $this->api->getUserId());
-		if ( $project && $project->canDelete() ) {
-			$this->projectMapper->delete($project);
-		}
-		$response = new RedirectResponse( $this->api->linkToRoute('projects.project.index') );
-		$response->setStatus(303);
-		return $response;
+		if ($project && $project->canDelete() ) $this->projectMapper->delete($project);
+		return $this->redirectProjectsIndex();
 	}
 
 	public function projectFromRequest($request=null) {

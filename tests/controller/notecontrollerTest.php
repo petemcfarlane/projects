@@ -35,12 +35,6 @@ class NotesControllerTest extends ControllerTestUtility {
 		);
 	}
 	
-	public function noteProvider() {
-		return array(
-			array( new Note (array('id'=>50, 'projectId'=>123, 'note'=>'text text blah blah blah')) ) // sample note
-		);
-	}
-
 	public function testIndexAnnotations() {
 		$loggedIn = array('IsAdminExemption', 'IsSubAdminExemption');
 		$loggedInCSRF = array('IsAdminExemption', 'IsSubAdminExemption', 'CSRFExemption');
@@ -58,8 +52,7 @@ class NotesControllerTest extends ControllerTestUtility {
 	public function testIndexNoProjectOrNoReadPerm($project) {
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects'));
 		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
-		$noteMapper = $this->getMock('NoteMapper', array('getNotes'));
-		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
+		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
 		$response = $this->controller->index();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
 		$this->assertEquals('index.php/apps/projects', $response->getRedirectUrl());
@@ -96,6 +89,7 @@ class NotesControllerTest extends ControllerTestUtility {
 		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects/project/123/notes'));
 		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
 		$noteMapper = $this->getMock('NoteMapper', array('getNote'));
+		$this->request = new Request(array('get'=>array('id'=>123, 'noteId'=>10)));
 		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
 		$response = $this->controller->show();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
@@ -109,10 +103,23 @@ class NotesControllerTest extends ControllerTestUtility {
 		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
 		$noteMapper = $this->getMock('NoteMapper', array('getNote'));
 		$noteMapper->expects($this->once())->method('getNote')->will($this->returnValue($this->mockNote));
+		$this->request = new Request(array('get'=>array('id'=>123, 'noteId'=>10)));
 		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
 		$response = $this->controller->show();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response );
 		$this->assertEquals('notes/show', $response->getTemplateName());
+	}
+
+	/**
+	 * @dataProvider userOrSharedProject
+	 * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage noteId not set
+	 */
+	public function testShowNoNoteIdInRequest($project) {
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		// $this->request = new Request(array('post'=>array('id'=>123, 'detailValue'=>'Blue')));
+		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
+		$this->controller->show();
 	}
 
 	/**
@@ -159,10 +166,22 @@ class NotesControllerTest extends ControllerTestUtility {
 		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
 		$noteMapper = $this->getMock('NoteMapper', array('insert'));
 		$noteMapper->expects($this->once())->method('insert')->will($this->returnValue($this->mockNote));
+		$this->request = new Request(array('post'=>array('id'=>123, 'note'=>10)));
 		$this->controller = new NotesController($this->api, $this->request, $noteMapper, $this->projectController);
 		$response = $this->controller->create();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
 		$this->assertEquals('index.php/apps/projects/123/notes/62', $response->getRedirectUrl());
+	}
+
+	/**
+	 * @dataProvider userOrSharedProject
+	 * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage note not set
+	 */
+	public function testCreateNoNoteInRequest($project) {
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
+		$this->controller->create();
 	}
 
 	/**
@@ -225,6 +244,30 @@ class NotesControllerTest extends ControllerTestUtility {
 	}
 		
 	/**
+	 * @dataProvider userOrSharedProject
+	 * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage noteId not set
+	 */
+	public function testUpdateNoNoteIdInRequest($project) {
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$this->request = new Request(array('post'=>array('id'=>123, 'note'=>'note about something')));
+		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
+		$this->controller->update();
+	}
+
+	/**
+	 * @dataProvider userOrSharedProject
+	 * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage note not set
+	 */
+	public function testUpdateNoNoteInRequest($project) {
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$this->request = new Request(array('post'=>array('id'=>123, 'noteId'=>10)));
+		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
+		$this->controller->update();
+	}
+
+	/**
 	 * @dataProvider noProjectOrPermissions
 	 */
 	public function testDestroyNoProjectOrDeletePerm($project) {
@@ -263,6 +306,18 @@ class NotesControllerTest extends ControllerTestUtility {
 		$response = $this->controller->destroy();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
 		$this->assertEquals('index.php/apps/projects/123/notes', $response->getRedirectUrl());
+	}
+
+	/**
+	 * @dataProvider userOrSharedProject
+	 * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage noteId not set
+	 */
+	public function testDestroyNoNoteIdInRequest($project) {
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$this->request = new Request(array('post'=>array('id'=>123)));
+		$this->controller = new NotesController($this->api, $this->request, null, $this->projectController);
+		$this->controller->destroy();
 	}
 
 
