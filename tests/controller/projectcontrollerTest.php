@@ -45,22 +45,30 @@ class ProjectControllerTest extends ControllerTestUtility {
 	}
 
 	public function testIndexReturnsIndexTemplate() {
-		$mockProjects = array('Project 1', 'Project 2');
-		$mockSharedProjects = array('Shared Project 1', 'Shared Project 2', 'Shared Project 3');
 		$projectMapper = $this->getMock('ProjectMapper', array('getProjects'));
-		$projectMapper->expects($this->once())->method('getProjects')->will($this->returnValue($mockProjects));
-		$this->api->expects($this->once())->method('getItemsSharedWith')->will($this->returnValue($mockSharedProjects));
 		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
 		$response = $this->controller->index();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response);
 		$this->assertEquals('index', $response->getTemplateName());
 	}
 	
+	public function testCreateReturnsCorrectTemplateResponse() {
+		$mockProject = new Project();
+		$projectMapper = $this->getMock('ProjectMapper', array('insert', 'getProjects'));
+		$projectMapper->expects($this->once())->method('insert')->will($this->returnValue($mockProject));
+		$projectMapper->expects($this->once())->method('getProjects')->will($this->returnValue($mockProject));
+		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
+		$response = $this->controller->create();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response);
+		$this->assertEquals('index', $response->getTemplateName());
+	}
+
 	/**
 	 * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage uid not set
 	 */
 	public function testGetProjectsWithNoUser() {
-		$this->assertInternalType('array', $this->controller->getProjects());
+		$this->controller->getProjects();
 	}
 	
 	public function testGetProjectsNoUserNoShared() {
@@ -99,29 +107,20 @@ class ProjectControllerTest extends ControllerTestUtility {
 		$this->assertEquals(array_merge($mockUserProjects, $mockSharedProjects), $response);
 	}
 
-	public function testCreateReturnsCorrectTemplateResponse() {
-		$mockProjects = array('Project 1', 'Project 2');
-		$projectMapper = $this->getMock('ProjectMapper', array('insert', 'getProjects'));
-		$projectMapper->expects($this->once())->method('insert')->will($this->returnValue($mockProjects));
-		$projectMapper->expects($this->once())->method('getProjects')->will($this->returnValue($mockProjects));
-		$this->controller = new ProjectController($this->api, $this->request, $projectMapper);
-		$response = $this->controller->create();
-		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response);
-		$this->assertEquals('index', $response->getTemplateName());
-	}
-
 	/**
 	 * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage uid not set
 	 */
 	public function testGetProjectWithNoUserId() {
-		$this->assertInternalType('array', $this->controller->getProject());
+		$this->controller->getProject(123);
 	}
 	
 	/**
 	 * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage projectId not set
 	 */
 	public function testGetProjectWithNoProjectId() {
-		$this->assertInternalType('array', $this->controller->getProject());
+		$this->controller->getProject(null, 123);
 	}
 	
 	public function testGetProjectWithUserOwnedProject() {

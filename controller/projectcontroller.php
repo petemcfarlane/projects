@@ -106,17 +106,17 @@ class ProjectController extends Controller {
 	}
 
 	public function getProjects($uid=null) {
-		if ($uid===null) Throw new \InvalidArgumentException("User id Not specified");
+		if ($uid===null) Throw new \InvalidArgumentException("uid not set");
 		$userProjects = $this->projectMapper->getProjects($uid);
 		return array_merge((array)$userProjects, (array)$this->api->getItemsSharedWith('projects', 0));
 	}
 	
-	public function getProject($id=null, $uid=null) {
-		if ($id===null) Throw new \InvalidArgumentException("Project id Not specified");
-		if ($uid===null) Throw new \InvalidArgumentException("User id Not specified");
-		$project = $this->projectMapper->getProject($id, $uid);
+	public function getProject($projectId=null, $uid=null) {
+		if ($projectId===null) Throw new \InvalidArgumentException("projectId not set");
+		if ($uid===null) Throw new \InvalidArgumentException("uid not set");
+		$project = $this->projectMapper->getProject($projectId, $uid);
 		if (!$project) {
-			$shared = $this->api->getItemSharedWith('projects', $id);
+			$shared = $this->api->getItemSharedWith('projects', $projectId);
 			$project = $this->projectMapper->findProjectById( $shared['item_source'], $uid, $shared['permissions'] );
 		}
 		return $project;
