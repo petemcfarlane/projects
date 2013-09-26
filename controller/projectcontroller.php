@@ -100,9 +100,18 @@ class ProjectController extends Controller {
 		if ($request===null) Throw new \InvalidArgumentException("Request data not set");
 		$project = new Project;
 		// set all project properties from request
-		$project->setId($request->id);
-		$project->setProjectName($request->projectName);
+		if ($request->id) $project->setId($request->id);
+		if ($request->name) $project->setName($request->name);
+		// if ($request->calendarId) $project->setCalendarId($request->calendarId);
 		return $project;
+	}
+
+	public function setCalendarId($project, $calendarId) {
+		$project->setCalendarId($calendarId);
+		$project->setId($this->request->id);
+		$project->setUpdatedAt(date("Y-m-d H:i:s"));
+		$project->setModifiedBy($this->api->getUserId());
+		$this->projectMapper->update($project);
 	}
 
 	public function getProjects($uid=null) {

@@ -41,10 +41,17 @@
 				<default></default>
 			</field>
 			<field>
-				<name>project_name</name>
+				<name>name</name>
 				<type>text</type>
 				<notnull>false</notnull>
 				<length>64</length>
+			</field>
+			<field>
+				<name>calendar_id</name>
+				<type>integer</type>
+				<default></default>
+				<notnull>false</notnull>
+				<length>4</length>
 			</field>
 		</declaration>
 	</table>

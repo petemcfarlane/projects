@@ -8,6 +8,7 @@ use \OCA\AppFramework\DependencyInjection\DIContainer as BaseContainer;
 use \OCA\Projects\Controller\ProjectController;
 use \OCA\Projects\Controller\DetailController;
 use \OCA\Projects\Controller\NotesController;
+use \OCA\Projects\Controller\TaskController;
 
 class DIContainer extends BaseContainer {
 
@@ -31,6 +32,10 @@ class DIContainer extends BaseContainer {
 
         $this['NotesController'] = function($c){
             return new NotesController($c['API'], $c['Request']);
+        };
+
+        $this['TaskController'] = function($c){
+            return new TaskController($c['API'], $c['Request']);
         };
     }
 

@@ -61,9 +61,9 @@ class ShareProjectTest extends TestUtility {
 						foreach ($items as $item) {
 							if (isset($parameters['search'])) {
 								$search = $parameters['search'];
-								$query = \OCP\DB::prepare('SELECT `id`, `customer`, `created_at`, `updated_at`, `uid`, `modified_by`, `project_name`, `platform`, `territories`, `oem` FROM `*PREFIX*salesquestionnaire` WHERE `id` = ? AND'
+								$query = \OCP\DB::prepare('SELECT `id`, `customer`, `created_at`, `updated_at`, `uid`, `modified_by`, `name`, `platform`, `territories`, `oem` FROM `*PREFIX*salesquestionnaire` WHERE `id` = ? AND'
 									. '(`customer` LIKE "%'.$search.'%" '
-									. 'OR `project_name` LIKE "%'.$search.'%" '
+									. 'OR `name` LIKE "%'.$search.'%" '
 									. 'OR `uid` LIKE "%'.$search.'%" '
 									. 'OR `platform` LIKE "%'.$search.'%" '
 									. 'OR `territories` LIKE "%'.$search.'%" '

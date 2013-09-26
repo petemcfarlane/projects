@@ -9,15 +9,15 @@ $(document).ready(function () {
 	 * PJAX
 	 * -----------------------*/
 	
-	if ($.support.pjax) {
-		$(document).pjax('#content a', '#content'); // every 'a' within '#content' to be clicked will load the content in '#content'
-
-		$(document).on('submit', '#content form', function(e) {
-			$.pjax.submit(e, '#content');
-		});
-		
-		$('#content').on('pjax:end', init );
-	}
+	// if ($.support.pjax) {
+		// $(document).pjax('#content a', '#content'); // every 'a' within '#content' to be clicked will load the content in '#content'
+// 
+		// $(document).on('submit', '#content form', function(e) {
+			// $.pjax.submit(e, '#content');
+		// });
+// 		
+		// $('#content').on('pjax:end', init );
+	// }
 	
 });
 
@@ -89,4 +89,20 @@ function init() {
     	$('.note-status').text('Unsaved changes');
     	$('#save-note').show();
     });
+
+	/* ------------------------
+	 * Tasks
+	 * -----------------------*/
+
+	$('#show-new-task-form').on('click', function() {
+		$(this).fadeOut();
+		$('#create-task').parent().slideDown();
+		$('#taskSummary').focus();
+		$('#cancel-new-task').on('click', function() {
+			$(':input', '#create-task').not(':button, :submit, :reset, :hidden').val('');
+			$('#create-task').parent().slideUp();
+			$('#show-new-task-form').fadeIn();
+		});
+	});
+
 }

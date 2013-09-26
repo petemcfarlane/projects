@@ -398,3 +398,29 @@
 #create-project .button {
 	margin: .8em 0 0 .8em;
 }
+
+/*
+ * Tasks
+ */
+
+input[type="checkbox"].task-complete {
+
+}
+.task-priority {
+	margin: 1em 0.4em 0 0.5em;
+	width: 1em;
+	display: inline-block;
+	text-align: center;
+	color: rgb(185, 0, 0);
+	font-weight: bold;
+}
+#content h2.task-summary {
+	display: inline-block;
+	margin: .6em 0;
+}
+.task-due {
+	margin: 1em 0;
+}
+.task-description {
+	margin: -.2em 0 .8em 3.4em;
+}

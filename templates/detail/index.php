@@ -1,6 +1,6 @@
 <div class="row">
 	<div class="columns small-12 center">
-		<h1>{{ projectName }} Details</h1>
+		<h1>{{ name }} Details</h1>
 		<a href="{{ url('projects.project.show', {'id':id}) }}" class="button menu-left">&lt; Project</a>
 	</div>
 </div>

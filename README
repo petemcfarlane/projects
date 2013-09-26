@@ -27,6 +27,15 @@ notes
 	update		/project/{id}/notes/{noteId}		POST
 	destroy		/project/{id}/notes/{noteId}/delete	POST
 
+tasks
+	index		/project/{id}/tasks					GET
+	create		/project/{id}/tasks					POST
+	update		/project/{id}/tasks/{taskId}		POST
+	destroy		/project/{id}/tasks/{taskId}/delete	POST
+
+
+
+
 meetings
 	index
 	create
