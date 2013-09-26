@@ -4,10 +4,11 @@ namespace OCA\Projects\Controller;
 use \OCA\AppFramework\Utility\ControllerTestUtility;
 use \OCA\AppFramework\Http\Request;
 use \OCA\Projects\Db\Project;
-// use \OCA\AppFramework\Http\RedirectResponse;
 require_once(__DIR__ . "/../classloader.php");
 
 class TaskControllerTest extends ControllerTestUtility {
+	
+	public $mockGetTasks;
 	
 	public function setUp() {
 		$this->api = $this->getAPIMock('OCA\Projects\Core\API');
@@ -15,6 +16,7 @@ class TaskControllerTest extends ControllerTestUtility {
 		$this->projectController = $this->getMock('ProjectController', array('getProject'));
 		$this->request = new Request();
 		$this->controller = new TaskController($this->api, $this->request, $this->projectController);
+		$this->mockGetTasks = array('task1', 'task2');
 	}
 	
 	public function userOrSharedProject() {
@@ -49,22 +51,6 @@ class TaskControllerTest extends ControllerTestUtility {
 	}
 
 	/**
-	 * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage projectId not set
-	 */
-	public function testGetTasksNoProjectId() {
-		$response = $this->controller->getTasks();
-	}
-
-	public function testGetTasksNoTasksNoneExist() {
-		
-	}
-
-	public function testGetTasks() {
-		
-	}
-
-	/**
 	 * @dataProvider noProjectOrPermissions
 	 */
 	public function testIndexNoProjectOrReadPerm($project) {
@@ -81,7 +67,7 @@ class TaskControllerTest extends ControllerTestUtility {
 	 */
 	public function testIndexUserProjectOrReadPerm($project) {
 		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
-		$this->controller = new TaskController($this->api, $this->request, $this->projectController);
+		$this->controller = new TaskController($this->api, $this->request, $this->projectController, $this->mockGetTasks);
 		$response = $this->controller->index();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response );
 		$this->assertEquals('tasks/index', $response->getTemplateName());
@@ -104,7 +90,11 @@ class TaskControllerTest extends ControllerTestUtility {
 	 * @dataProvider userOrSharedProject
 	 */
 	public function testCreateUserProjectOrCreatePerm($project) {
-		
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$this->controller = new TaskController($this->api, $this->request, $this->projectController, $this->mockGetTasks);
+		$response = $this->controller->create();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\TemplateResponse', $response);
+		$this->assertEquals('tasks/index', $response->getTemplateName());
 	}
 
 	/**
@@ -124,7 +114,12 @@ class TaskControllerTest extends ControllerTestUtility {
 	 * @dataProvider userOrSharedProject
 	 */
 	public function testUpdateUserProjectOrUpdatePerm($project) {
-		
+		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects/{id}/tasks'));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$this->controller = new TaskController($this->api, $this->request, $this->projectController, $this->mockGetTasks);
+		$response = $this->controller->update();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
+		$this->assertEquals('index.php/apps/projects/{id}/tasks', $response->getRedirectUrl());
 	}
 
 	/**
@@ -137,14 +132,18 @@ class TaskControllerTest extends ControllerTestUtility {
 		$response = $this->controller->destroy();
 		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
 		$this->assertEquals('index.php/apps/projects', $response->getRedirectUrl());
-		
 	}
 
 	/**
 	 * @dataProvider userOrSharedProject
 	 */
 	public function testDestroyUserProjectOrDestroyPerm($project) {
-		
+		$this->api->expects($this->once())->method('linkToRoute')->will($this->returnValue('index.php/apps/projects/{id}/tasks'));
+		$this->projectController->expects($this->once())->method('getProject')->will($this->returnValue($project));
+		$this->controller = new TaskController($this->api, $this->request, $this->projectController, $this->mockGetTasks);
+		$response = $this->controller->destroy();
+		$this->assertInstanceOf('\OCA\AppFramework\Http\RedirectResponse', $response );
+		$this->assertEquals('index.php/apps/projects/{id}/tasks', $response->getRedirectUrl());
 	}
 
 }

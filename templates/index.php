@@ -8,7 +8,7 @@
 	<form action="{{ url('projects.project.create') }}" method="post" id="create-project">
 		<input type="hidden" name="requesttoken" value="{{ requesttoken }}" />
 		<div class="columns large-8">
-			<input type="text" name="projectName" id="projectName" placeholder="Enter a project name" autocomplete="off" />
+			<input type="text" name="name" id="projectName" placeholder="Enter a project name" autocomplete="off" />
 		</div>
 		<div class="columns large-4">
 			<a id="cancel-new-project" class="button right">Cancel</a>
@@ -20,12 +20,11 @@
 	{% for project in projects %}
 		<div class="row border-top hover-gray">
 			<div class="columns large-12">
-				<h2 class="project-name"><a href="{{ url('projects.project.show', {'id':project.id}) }}">{{ project.projectName }}</a></h2>
+				<h2 class="project-name"><a href="{{ url('projects.project.show', {'id':project.id}) }}">{{ project.name }}</a></h2>
 				<span class="project-links">
-					<!-- <a href="">Tasks</a> -->
-					<!-- <a href="">Meetings</a> -->
 					<a href="{{ url('projects.detail.index', {'id':project.id}) }}">Details</a>
 					<a href="{{ url('projects.notes.index', {'id':project.id}) }}">Notes</a>
+					<a href="{{ url('projects.task.index', {'id':project.id}) }}">Tasks</a>
 					<a class="share" data-item-type="projects" data-item="{{ project.id }}" data-possible-permissions="31" data-private-link="false" data-link"true">Share</a>
 				</span>
 			</div>

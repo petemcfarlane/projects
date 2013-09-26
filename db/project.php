@@ -9,7 +9,8 @@ class Project extends Entity {
 	public $uid;
 	public $updatedAt;
 	public $modifiedBy;
-	public $projectName;
+	public $name;
+	public $calendarId;
 	protected $user;
 	protected $permissions;
 

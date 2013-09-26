@@ -3,7 +3,7 @@
     <id>projects</id>
     <name>Projects</name>
     <description>View and manage projects</description>
-    <version>0.21</version>
+    <version>0.43</version>
     <licence>AGPL</licence>
     <author>Pete McFarlane</author>
     <require>5</require>
